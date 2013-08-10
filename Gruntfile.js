@@ -71,7 +71,9 @@ module.exports = function(grunt) {
 		coffee: {
 			compile: {
 				files: {
-					"dist/jquery.onescroll.js": "src/jquery.onescroll.coffee"
+					"dist/jquery.onescroll.js": [
+						srcPath + "/jquery.onescroll.coffee"
+					]
 				}
 			}
 		},

@@ -2,7 +2,7 @@
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   (function($, window) {
-    var Onescroll, defaults, pluginName;
+    var Onescroll, OnescrollVertical, defaults, pluginName;
     pluginName = "onescroll";
     defaults = {
       wrapperClassName: "" + pluginName + "-wrapper",
@@ -14,12 +14,57 @@
       height: "auto",
       width: "auto"
     };
+    OnescrollVertical = (function() {
+      function OnescrollVertical(onescroll, options) {
+        this.onescroll = onescroll;
+        this.settings = $.extend({}, defaults, options);
+        this.barEdge = "top";
+        this.init();
+      }
+
+      OnescrollVertical.prototype.init = function() {
+        this.createRail();
+        return this.createBar();
+      };
+
+      OnescrollVertical.prototype.createRail = function() {
+        this.$rail = $("<div class=\"" + this.onescroll.settings.railVerticalClassName + "\"></div>").uniqueId();
+        this.railId = this.$rail.get(0).id;
+        return this.onescroll.$elWrapper.append(this.$rail);
+      };
+
+      OnescrollVertical.prototype.createBar = function() {
+        var _this = this;
+        this.$bar = $("<div class=\"" + this.onescroll.settings.barVerticalClassName + "\"></div>").uniqueId();
+        this.barId = this.$bar.get(0).id;
+        this.onescroll.$elWrapper.append(this.$bar);
+        return this.$bar.draggable({
+          axis: "y",
+          containment: "parent",
+          start: function(ev) {
+            return console.log(ev);
+          },
+          drag: function(ev) {
+            return _this.onescroll.scrollTo(null, $(ev.target).position().top);
+          },
+          stop: function(ev) {
+            return console.log(ev);
+          }
+        });
+      };
+
+      OnescrollVertical.prototype.getPercentage = function() {
+        return parseInt(this.$bar.css(this.barEdge), 10) / (this.onescroll.$elWrapper.outerHeight() - this.$bar.outerHeight());
+      };
+
+      return OnescrollVertical;
+
+    })();
     Onescroll = (function() {
       function Onescroll(element, options) {
         this.element = element;
         this._onWheel = __bind(this._onWheel, this);
         window.test = this.element;
-        window.s = "s";
         this.settings = $.extend({}, defaults, options);
         this.before = {};
         this._defaults = defaults;
@@ -53,8 +98,7 @@
         this.barEdge = this.type === "vertical" ? "top" : "left";
         this.mostTop = -(this.$el.outerHeight() - this.$elWrapper.outerHeight());
         this.mostLeft = -(this.$el.outerWidth() - this.$elWrapper.outerWidth());
-        this.createRailVertical();
-        this.createBarVertical();
+        this.vertical = new OnescrollVertical(this);
         window.$el = this.$el;
         window.$elWrapper = this.$elWrapper;
         return this.addEventListeners();
@@ -68,17 +112,15 @@
         return this.scrollWheel(d, dX, dY);
       };
 
-      Onescroll.prototype.getScrollPercentage = function() {
-        return parseInt(this.$bar.css(this.barEdge), 10) / (this.$elWrapper.outerHeight() - this.$bar.outerHeight());
+      Onescroll.prototype.setScrollPercentage = function(bar) {
+        return console.log('he');
       };
 
       Onescroll.prototype.scrollTo = function(x, y) {
-        var scrollPercentage, ss;
-        scrollPercentage = this.getScrollPercentage();
+        console.log(x, y);
         if (!!y) {
-          this.$el.css("top", scrollPercentage * this.mostTop);
+          return this.$el.css("top", this.vertical.getPercentage() * this.mostTop);
         }
-        return ss = x = y;
       };
 
       Onescroll.prototype.scrollWheel = function(d, dX, dY) {
@@ -109,30 +151,6 @@
         var delta;
         delta = y;
         return console.log(y, isWheel, isJump);
-      };
-
-      Onescroll.prototype.createRailVertical = function() {
-        this.$rail = this.railVertical = $("<div class=\"" + this.settings.railVerticalClassName + "\"></div>");
-        return this.$elWrapper.append(this.railVertical);
-      };
-
-      Onescroll.prototype.createBarVertical = function() {
-        var _this = this;
-        this.$bar = this.barVertical = $("<div class=\"" + this.settings.barVerticalClassName + "\"></div>");
-        this.$elWrapper.append(this.barVertical);
-        return this.barVertical.draggable({
-          axis: "y",
-          containment: "parent",
-          start: function(ev) {
-            return console.log(ev);
-          },
-          drag: function(ev) {
-            return _this.scrollTo(null, $(ev.target).position().top);
-          },
-          stop: function(ev) {
-            return console.log(ev);
-          }
-        });
       };
 
       return Onescroll;

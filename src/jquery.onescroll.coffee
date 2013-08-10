@@ -11,11 +11,46 @@ do ($ = jQuery, window) ->
 		height: "auto"
 		width: "auto"
 
+	class OnescrollVertical
+		constructor: (@onescroll, options) ->
+			@settings = $.extend {}, defaults, options
+			@barEdge = "top"
+			@init()
+
+		init: ->
+			@createRail()
+			@createBar()
+
+		createRail: ->
+			@$rail = $("<div class=\"#{@onescroll.settings.railVerticalClassName}\"></div>").uniqueId()
+			# Save the id, future reference
+			@railId = @$rail.get(0).id
+			@onescroll.$elWrapper.append(@$rail)
+
+		createBar: ->
+			@$bar = $("<div class=\"#{@onescroll.settings.barVerticalClassName}\"></div>").uniqueId()
+			# Save the id, future reference
+			@barId = @$bar.get(0).id
+			@onescroll.$elWrapper.append(@$bar)
+			@$bar.draggable(
+				axis: "y"
+				containment: "parent"
+				start: (ev) =>
+					console.log ev
+				drag: (ev) =>
+					@onescroll.scrollTo(null, $(ev.target).position().top)
+				stop: (ev) =>
+					console.log ev
+			)
+
+		getPercentage: ->
+			parseInt(@$bar.css(@barEdge), 10) / (@onescroll.$elWrapper.outerHeight() - @$bar.outerHeight())
+
+
 	# Onescroll constructor
 	class Onescroll
 		constructor: (@element, options) ->
 			window.test = @element
-			window.s = "s"
 			@settings = $.extend {}, defaults, options
 			@before = {}
 			@_defaults = defaults
@@ -54,9 +89,7 @@ do ($ = jQuery, window) ->
 			@mostTop = -(@$el.outerHeight() - @$elWrapper.outerHeight())
 			@mostLeft = -(@$el.outerWidth() - @$elWrapper.outerWidth())
 
-
-			@createRailVertical()
-			@createBarVertical()
+			@vertical = new OnescrollVertical(@)
 
 			window.$el = @$el
 			window.$elWrapper = @$elWrapper
@@ -69,15 +102,15 @@ do ($ = jQuery, window) ->
 		_onWheel: (ev, d, dX, dY) =>
 			@scrollWheel(d, dX, dY)
 
-		getScrollPercentage: ->
-			parseInt(@$bar.css(@barEdge), 10) / (@$elWrapper.outerHeight() - @$bar.outerHeight())
+		setScrollPercentage: (bar) ->
+			console.log('he')
 
 		scrollTo: (x, y) ->
-			scrollPercentage = @getScrollPercentage()
+			console.log(x, y)
 			if !!y
-				@$el.css "top", scrollPercentage * @mostTop
-			ss = x = y
+				@$el.css "top", @vertical.getPercentage() * @mostTop
 
+		# This enables mouse wheel to be working.
 		scrollWheel: (d, dX, dY) ->
 			top = parseInt(@$el.css("top"), 10) || 0
 			left = parseInt(@$el.css("left"), 10) || 0
@@ -104,24 +137,6 @@ do ($ = jQuery, window) ->
 		scrollContent: (y, isWheel, isJump) ->
 			delta = y
 			console.log y, isWheel, isJump
-
-		createRailVertical: ->
-			@$rail = @railVertical = $("<div class=\"#{@settings.railVerticalClassName}\"></div>")
-			@$elWrapper.append(@railVertical)
-
-		createBarVertical: ->
-			@$bar = @barVertical = $("<div class=\"#{@settings.barVerticalClassName}\"></div>")
-			@$elWrapper.append(@barVertical)
-			@barVertical.draggable(
-				axis: "y"
-				containment: "parent"
-				start: (ev) =>
-					console.log ev
-				drag: (ev) =>
-					@scrollTo(null, $(ev.target).position().top)
-				stop: (ev) =>
-					console.log ev
-			)
 
 	# A really lightweight plugin wrapper around the constructor,
 	# preventing against multiple instantiations
