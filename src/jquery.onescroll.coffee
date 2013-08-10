@@ -45,11 +45,11 @@ do ($ = jQuery, window) ->
 			@createRail()
 			@createBar()
 
-		updatePosition: (top, left) ->
-			if top
-				percentage =  top / @onescroll.mostTop
-				barTop = (@onescroll.$elWrapper.outerHeight() - @$bar.outerHeight()) * percentage
-				@$bar.css "top", barTop
+		updatePosition: (top) ->
+			top = top || 0
+			percentage =  top / @onescroll.mostTop || 0
+			barTop = (@onescroll.$elWrapper.outerHeight() - @$bar.outerHeight()) * percentage
+			@$bar.css "top", barTop
 
 		createBar: ->
 			super
@@ -77,10 +77,10 @@ do ($ = jQuery, window) ->
 			@createBar()
 
 		updatePosition: (top, left) ->
-			if left
-				percentage =  left / @onescroll.mostLeft
-				barLeft = (@onescroll.$elWrapper.outerWidth() - @$bar.outerWidth()) * percentage
-				@$bar.css "left", barLeft
+			left = left || 0
+			percentage =  left / @onescroll.mostLeft || 0
+			barLeft = (@onescroll.$elWrapper.outerWidth() - @$bar.outerWidth()) * percentage
+			@$bar.css "left", barLeft
 
 		createBar: ->
 			super
@@ -177,11 +177,7 @@ do ($ = jQuery, window) ->
 			@$el.css "top", effectiveTop
 			@$el.css "left", effectiveLeft
 
-			@$elWrapper.trigger("onescroll:scrolled", effectiveTop, effectiveLeft)
-
-		scrollContent: (y, isWheel, isJump) ->
-			delta = y
-			console.log y, isWheel, isJump
+			@$elWrapper.trigger "onescroll:scrolled", [effectiveTop, effectiveLeft]
 
 	# A really lightweight plugin wrapper around the constructor,
 	# preventing against multiple instantiations

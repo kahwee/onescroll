@@ -61,13 +61,12 @@
         this.createBar();
       }
 
-      OnescrollVertical.prototype.updatePosition = function(top, left) {
+      OnescrollVertical.prototype.updatePosition = function(top) {
         var barTop, percentage;
-        if (top) {
-          percentage = top / this.onescroll.mostTop;
-          barTop = (this.onescroll.$elWrapper.outerHeight() - this.$bar.outerHeight()) * percentage;
-          return this.$bar.css("top", barTop);
-        }
+        top = top || 0;
+        percentage = top / this.onescroll.mostTop || 0;
+        barTop = (this.onescroll.$elWrapper.outerHeight() - this.$bar.outerHeight()) * percentage;
+        return this.$bar.css("top", barTop);
       };
 
       OnescrollVertical.prototype.createBar = function() {
@@ -110,11 +109,10 @@
 
       OnescrollHorizontal.prototype.updatePosition = function(top, left) {
         var barLeft, percentage;
-        if (left) {
-          percentage = left / this.onescroll.mostLeft;
-          barLeft = (this.onescroll.$elWrapper.outerWidth() - this.$bar.outerWidth()) * percentage;
-          return this.$bar.css("left", barLeft);
-        }
+        left = left || 0;
+        percentage = left / this.onescroll.mostLeft || 0;
+        barLeft = (this.onescroll.$elWrapper.outerWidth() - this.$bar.outerWidth()) * percentage;
+        return this.$bar.css("left", barLeft);
       };
 
       OnescrollHorizontal.prototype.createBar = function() {
@@ -223,13 +221,7 @@
         }
         this.$el.css("top", effectiveTop);
         this.$el.css("left", effectiveLeft);
-        return this.$elWrapper.trigger("onescroll:scrolled", effectiveTop, effectiveLeft);
-      };
-
-      Onescroll.prototype.scrollContent = function(y, isWheel, isJump) {
-        var delta;
-        delta = y;
-        return console.log(y, isWheel, isJump);
+        return this.$elWrapper.trigger("onescroll:scrolled", [effectiveTop, effectiveLeft]);
       };
 
       return Onescroll;
