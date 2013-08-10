@@ -51,7 +51,7 @@
         return this.onescroll.$elWrapper.append(this.$rail);
       };
 
-      OnescrollGeneric.prototype.setBarPosition = function(position) {
+      OnescrollGeneric.prototype._setBarBoxOffset = function(position) {
         if (this.settings.railCss[position] != null) {
           return this.$bar.css(position, this.settings.railCss[position]);
         }
@@ -64,7 +64,7 @@
         _ref = ["right", "top", "left", "bottom"];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           pos = _ref[_i];
-          this.setBarPosition(pos);
+          this._setBarBoxOffset(pos);
         }
         return this.onescroll.$elWrapper.append(this.$bar);
       };
@@ -88,10 +88,11 @@
 
       OnescrollVertical.prototype.updateBarPosition = function(top) {
         var barTop, percentage;
-        top = top || 0;
-        percentage = top / this.onescroll.mostTop || 0;
-        barTop = (this.$railInner.outerHeight() - this.$bar.outerHeight()) * percentage + this.railPadding[0];
-        return this.$bar.css("top", barTop);
+        if (top != null) {
+          percentage = top / this.onescroll.mostTop || 0;
+          barTop = (this.$railInner.outerHeight() - this.$bar.outerHeight()) * percentage + this.railPadding[0];
+          return this.$bar.css("top", barTop);
+        }
       };
 
       OnescrollVertical.prototype.createBar = function() {
@@ -136,10 +137,11 @@
 
       OnescrollHorizontal.prototype.updateBarPosition = function(top, left) {
         var barLeft, percentage;
-        left = left || 0;
-        percentage = left / this.onescroll.mostLeft || 0;
-        barLeft = (this.$railInner.outerWidth() - this.$bar.outerWidth()) * percentage + this.railPadding[0];
-        return this.$bar.css("left", barLeft);
+        if (left != null) {
+          percentage = left / this.onescroll.mostLeft || 0;
+          barLeft = (this.$railInner.outerWidth() - this.$bar.outerWidth()) * percentage + this.railPadding[0];
+          return this.$bar.css("left", barLeft);
+        }
       };
 
       OnescrollHorizontal.prototype.createBar = function() {

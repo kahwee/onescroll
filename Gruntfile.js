@@ -45,7 +45,7 @@ module.exports = function(grunt) {
 		},
 		// Banner definitions
 		meta: {
-			banner: "/*\n" + " *  <%= pkg.title || pkg.name %> - v<%= pkg.version %>\n" + " *  <%= pkg.description %>\n" + " *  <%= pkg.homepage %>\n" + " *\n" + " *  Made by <%= pkg.author.name %>\n" + " *  Under <%= pkg.licenses[0].type %> License\n" + " */\n"
+			banner: "/*\n" + " *  <%= pkg.title || pkg.name %> - v<%= pkg.version %>\n" + " *  <%= pkg.description %>\n" + " *  <%= pkg.homepage %>\n" + " *\n" + " *  Made by <%= pkg.author.name %>\n" + " *  Under <%= pkg.license.type %> License\n" + " */\n"
 		},
 
 		// Lint definitions
@@ -110,8 +110,8 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks("grunt-contrib-coffee");
 
 	grunt.registerTask("css", ["less:dev", "less:dist"]);
-	grunt.registerTask("js", ["coffee", "jshint", "uglify"]);
+	grunt.registerTask("js", ["coffee", "uglify"]);
 	grunt.registerTask("default", ["js", "css"]);
-	grunt.registerTask("travis", ["jshint"]);
+	grunt.registerTask("travis");
 
 };

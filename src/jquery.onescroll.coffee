@@ -46,7 +46,7 @@ do ($ = jQuery, window) ->
 			@railId = @$rail.get(0).id
 			@onescroll.$elWrapper.append(@$rail)
 
-		setBarPosition: (position) ->
+		_setBarBoxOffset: (position) ->
 			if @settings.railCss[position]?
 				@$bar.css position, @settings.railCss[position]
 
@@ -54,7 +54,7 @@ do ($ = jQuery, window) ->
 			@$bar = $("<div class=\"#{@barClassName}\"></div>").uniqueId()
 			# Save the id, future reference
 			@barId = @$bar.get(0).id
-			@setBarPosition pos for pos in ["right", "top", "left", "bottom"]
+			@_setBarBoxOffset pos for pos in ["right", "top", "left", "bottom"]
 			@onescroll.$elWrapper.append(@$bar)
 
 	# Vertical scrollbar
@@ -73,10 +73,10 @@ do ($ = jQuery, window) ->
 			@createBar()
 
 		updateBarPosition: (top) ->
-			top = top || 0
-			percentage =  top / @onescroll.mostTop || 0
-			barTop = (@$railInner.outerHeight() - @$bar.outerHeight()) * percentage + @railPadding[0]
-			@$bar.css "top", barTop
+			if top?
+				percentage =  top / @onescroll.mostTop || 0
+				barTop = (@$railInner.outerHeight() - @$bar.outerHeight()) * percentage + @railPadding[0]
+				@$bar.css "top", barTop
 
 		createBar: ->
 			super
@@ -113,10 +113,10 @@ do ($ = jQuery, window) ->
 			@createBar()
 
 		updateBarPosition: (top, left) ->
-			left = left || 0
-			percentage =  left / @onescroll.mostLeft || 0
-			barLeft = (@$railInner.outerWidth() - @$bar.outerWidth()) * percentage + @railPadding[0]
-			@$bar.css "left", barLeft
+			if left?
+				percentage =  left / @onescroll.mostLeft || 0
+				barLeft = (@$railInner.outerWidth() - @$bar.outerWidth()) * percentage + @railPadding[0]
+				@$bar.css "left", barLeft
 
 		createBar: ->
 			super
