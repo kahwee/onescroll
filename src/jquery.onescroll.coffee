@@ -149,6 +149,7 @@ do ($ = jQuery, window) ->
 		_onWheel: (ev, d, dX, dY) =>
 			@scrollWheel(d, dX, dY)
 			@$elWrapper.trigger("onescroll:mousewheel", d, dX, dY)
+			ev.preventDefault()
 
 		scrollTo: (left, top) ->
 			if !!top
@@ -161,7 +162,8 @@ do ($ = jQuery, window) ->
 			top = parseInt(@$el.css("top"), 10) || 0
 			left = parseInt(@$el.css("left"), 10) || 0
 			effectiveTop = top + dY
-			effectiveLeft = left + dX
+			effectiveLeft = left - dX
+			console.log d, dX, effectiveLeft
 			if effectiveTop >= 0
 				effectiveTop = 0
 			else if effectiveTop <= @mostTop

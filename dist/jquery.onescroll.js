@@ -191,7 +191,8 @@
 
       Onescroll.prototype._onWheel = function(ev, d, dX, dY) {
         this.scrollWheel(d, dX, dY);
-        return this.$elWrapper.trigger("onescroll:mousewheel", d, dX, dY);
+        this.$elWrapper.trigger("onescroll:mousewheel", d, dX, dY);
+        return ev.preventDefault();
       };
 
       Onescroll.prototype.scrollTo = function(left, top) {
@@ -208,7 +209,8 @@
         top = parseInt(this.$el.css("top"), 10) || 0;
         left = parseInt(this.$el.css("left"), 10) || 0;
         effectiveTop = top + dY;
-        effectiveLeft = left + dX;
+        effectiveLeft = left - dX;
+        console.log(d, dX, effectiveLeft);
         if (effectiveTop >= 0) {
           effectiveTop = 0;
         } else if (effectiveTop <= this.mostTop) {
