@@ -150,13 +150,11 @@ do ($ = jQuery, window) ->
 			@scrollWheel(d, dX, dY)
 			@$elWrapper.trigger("onescroll:mousewheel", d, dX, dY)
 
-		setScrollPercentage: (bar) ->
-			console.log('he')
-
-		scrollTo: (x, y) ->
-			console.log(x, y)
-			if !!y
+		scrollTo: (left, top) ->
+			if !!top
 				@$el.css "top", @vertical.getPercentage() * @mostTop
+			if !!left
+				@$el.css "left", @horizontal.getPercentage() * @mostLeft
 
 		# This enables mouse wheel to be working.
 		scrollWheel: (d, dX, dY) ->

@@ -194,14 +194,12 @@
         return this.$elWrapper.trigger("onescroll:mousewheel", d, dX, dY);
       };
 
-      Onescroll.prototype.setScrollPercentage = function(bar) {
-        return console.log('he');
-      };
-
-      Onescroll.prototype.scrollTo = function(x, y) {
-        console.log(x, y);
-        if (!!y) {
-          return this.$el.css("top", this.vertical.getPercentage() * this.mostTop);
+      Onescroll.prototype.scrollTo = function(left, top) {
+        if (!!top) {
+          this.$el.css("top", this.vertical.getPercentage() * this.mostTop);
+        }
+        if (!!left) {
+          return this.$el.css("left", this.horizontal.getPercentage() * this.mostLeft);
         }
       };
 
