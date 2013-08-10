@@ -34,9 +34,7 @@
           if (target == null) {
             return _this.updateBarPosition(top, left);
           } else {
-            console.log(target.barId, _this.barId, target.barId !== _this.barId);
             if (_this.barId !== target.barId) {
-              console.log("new", top, left);
               return _this.updateBarPosition(top, left);
             }
           }
@@ -205,28 +203,22 @@
         if (__indexOf.call(validScrollbarTypes, type) >= 0) {
           switch (type) {
             case "Vertical":
-              this.scrollbars.push(new OnescrollVertical(this, settings));
-              break;
+              return this.scrollbars.push(new OnescrollVertical(this, settings));
             case "VerticalRight":
               settings.railCss.right = 0;
-              this.scrollbars.push(new OnescrollVertical(this, settings));
-              break;
+              return this.scrollbars.push(new OnescrollVertical(this, settings));
             case "VerticalLeft":
               settings.railCss.left = 0;
-              this.scrollbars.push(new OnescrollVertical(this, settings));
-              break;
+              return this.scrollbars.push(new OnescrollVertical(this, settings));
             case "Horizontal":
-              this.scrollbars.push(new OnescrollHorizontal(this, settings));
-              break;
+              return this.scrollbars.push(new OnescrollHorizontal(this, settings));
             case "HorizontalTop":
               settings.railCss.top = 0;
-              this.scrollbars.push(new OnescrollHorizontal(this, settings));
-              break;
+              return this.scrollbars.push(new OnescrollHorizontal(this, settings));
             case "HorizontalBottom":
               settings.railCss.bottom = 0;
-              this.scrollbars.push(new OnescrollHorizontal(this, settings));
+              return this.scrollbars.push(new OnescrollHorizontal(this, settings));
           }
-          return console.log("HSSS");
         } else {
           throw ("" + options.type + " is not supported. Supported types are: ") + validScrollbarTypes.join(', ');
         }

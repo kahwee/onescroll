@@ -33,9 +33,7 @@ do ($ = jQuery, window) ->
 				if not target?
 					@updateBarPosition(top, left)
 				else
-					console.log target.barId, @barId, target.barId isnt @barId
 					if @barId isnt target.barId
-						console.log "new", top, left
 						@updateBarPosition(top, left)
 
 		createRail: ->
@@ -182,9 +180,6 @@ do ($ = jQuery, window) ->
 					when "HorizontalBottom"
 						settings.railCss.bottom = 0
 						@scrollbars.push new OnescrollHorizontal(@, settings)
-
-
-				console.log "HSSS"
 			else
 				throw "#{options.type} is not supported. Supported types are: " + validScrollbarTypes.join(', ')
 
