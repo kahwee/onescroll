@@ -1,4 +1,5 @@
 @import "variables";
+@import "mixins";
 
 .onescroll {
 }
@@ -12,24 +13,35 @@
 .onescroll-rail-h, .onescroll-bar-h {
 	position: absolute;
 	display: block;
-	border-radius: 3px;
 }
-.onescroll-rail-v, .onescroll-rail-h {
+
+.onescroll-rail-v-inner, .onescroll-rail-h-inner {
 	background: @onescroll-rail-background;
 	opacity: .4;
+	border-radius: 3px;
+}
+
+.onescroll-rail-v, .onescroll-rail-h {
+	.box-sizing(border-box);
 	z-index: @onescroll-rail-z-index;
 }
 
 .onescroll-bar-v, .onescroll-bar-h {
+	border-radius: 3px;
 	background: @onescroll-bar-background;
 	opacity: .4;
 	z-index: @onescroll-bar-z-index;
 }
 
 .onescroll-rail-v {
-	width: @onescroll-rail-thickness;
+	padding-top: @onescroll-rail-padding;
+	padding-bottom: @onescroll-rail-padding;
 	height: 100%;
 	top: 0;
+}
+.onescroll-rail-v-inner {
+	height: 100%;
+	width: @onescroll-rail-thickness;
 }
 
 .onescroll-bar-v {
@@ -39,9 +51,14 @@
 }
 
 .onescroll-rail-h {
+	padding-left: @onescroll-rail-padding;
+	padding-right: @onescroll-rail-padding;
+	width: 100%;
+	left: 0;
+}
+.onescroll-rail-h-inner {
 	width: 100%;
 	height: @onescroll-rail-thickness;
-	left: 0;
 }
 
 .onescroll-bar-h {

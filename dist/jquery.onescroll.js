@@ -29,12 +29,14 @@
         this.railClassName = this.onescroll.settings["rail" + this.settings.type + "ClassName"];
         this.barClassName = this.onescroll.settings["bar" + this.settings.type + "ClassName"];
         this.onescroll.$elWrapper.on("onescroll:scrolled", function(ev, top, left) {
-          return _this.updatePosition(top, left);
+          return _this.updateBarPosition(top, left);
         });
       }
 
       OnescrollGeneric.prototype.createRail = function() {
         this.$rail = $("<div class=\"" + this.railClassName + "\"></div>").uniqueId();
+        this.$railInner = $("<div class=\"" + this.railClassName + "-inner\"></div>");
+        this.$rail.append(this.$railInner);
         this.railId = this.$rail.get(0).id;
         return this.onescroll.$elWrapper.append(this.$rail);
       };
@@ -58,23 +60,24 @@
         settings.type = "Vertical";
         OnescrollVertical.__super__.constructor.call(this, this.onescroll, settings);
         this.createRail();
+        this.railPadding = [parseInt(this.$rail.css("padding-top"), 10), parseInt(this.$rail.css("padding-bottom"), 10)];
         this.createBar();
       }
 
-      OnescrollVertical.prototype.updatePosition = function(top) {
+      OnescrollVertical.prototype.updateBarPosition = function(top) {
         var barTop, percentage;
         top = top || 0;
         percentage = top / this.onescroll.mostTop || 0;
-        barTop = (this.onescroll.$elWrapper.outerHeight() - this.$bar.outerHeight()) * percentage;
+        barTop = (this.$railInner.outerHeight() - this.$bar.outerHeight()) * percentage + this.railPadding[0];
         return this.$bar.css("top", barTop);
       };
 
       OnescrollVertical.prototype.createBar = function() {
         var _this = this;
         OnescrollVertical.__super__.createBar.apply(this, arguments);
-        return this.$bar.draggable({
+        this.$bar.draggable({
           axis: "y",
-          containment: "parent",
+          containment: this.$railInner,
           start: function(ev) {
             return console.log(ev);
           },
@@ -85,10 +88,11 @@
             return console.log(ev);
           }
         });
+        return this.updateBarPosition(0);
       };
 
       OnescrollVertical.prototype.getPercentage = function() {
-        return parseInt(this.$bar.css(this.barEdge), 10) / (this.onescroll.$elWrapper.outerHeight() - this.$bar.outerHeight());
+        return (parseInt(this.$bar.css(this.barEdge), 10) - this.railPadding[0]) / (this.$railInner.outerHeight() - this.$bar.outerHeight());
       };
 
       return OnescrollVertical;
@@ -104,23 +108,24 @@
         settings.type = "Horizontal";
         OnescrollHorizontal.__super__.constructor.call(this, this.onescroll, settings);
         this.createRail();
+        this.railPadding = [parseInt(this.$rail.css("padding-left"), 10), parseInt(this.$rail.css("padding-right"), 10)];
         this.createBar();
       }
 
-      OnescrollHorizontal.prototype.updatePosition = function(top, left) {
+      OnescrollHorizontal.prototype.updateBarPosition = function(top, left) {
         var barLeft, percentage;
         left = left || 0;
         percentage = left / this.onescroll.mostLeft || 0;
-        barLeft = (this.onescroll.$elWrapper.outerWidth() - this.$bar.outerWidth()) * percentage;
+        barLeft = (this.$railInner.outerWidth() - this.$bar.outerWidth()) * percentage + this.railPadding[0];
         return this.$bar.css("left", barLeft);
       };
 
       OnescrollHorizontal.prototype.createBar = function() {
         var _this = this;
         OnescrollHorizontal.__super__.createBar.apply(this, arguments);
-        return this.$bar.draggable({
+        this.$bar.draggable({
           axis: "x",
-          containment: "parent",
+          containment: this.$railInner,
           start: function(ev) {
             return console.log(ev);
           },
@@ -131,10 +136,11 @@
             return console.log(ev);
           }
         });
+        return this.updateBarPosition(null, 0);
       };
 
       OnescrollHorizontal.prototype.getPercentage = function() {
-        return parseInt(this.$bar.css(this.barEdge), 10) / (this.onescroll.$elWrapper.outerWidth() - this.$bar.outerWidth());
+        return (parseInt(this.$bar.css(this.barEdge), 10) - this.railPadding[0]) / (this.$railInner.outerWidth() - this.$bar.outerWidth());
       };
 
       return OnescrollHorizontal;

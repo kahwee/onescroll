@@ -22,10 +22,12 @@ do ($ = jQuery, window) ->
 			@railClassName = @onescroll.settings["rail#{@settings.type}ClassName"]
 			@barClassName = @onescroll.settings["bar#{@settings.type}ClassName"]
 			@onescroll.$elWrapper.on "onescroll:scrolled", (ev, top, left) =>
-				@updatePosition(top, left)
+				@updateBarPosition(top, left)
 
 		createRail: ->
 			@$rail = $("<div class=\"#{@railClassName}\"></div>").uniqueId()
+			@$railInner = $("<div class=\"#{@railClassName}-inner\"></div>")
+			@$rail.append @$railInner
 			# Save the id, future reference
 			@railId = @$rail.get(0).id
 			@onescroll.$elWrapper.append(@$rail)
@@ -43,19 +45,25 @@ do ($ = jQuery, window) ->
 			settings.type = "Vertical"
 			super @onescroll, settings
 			@createRail()
+
+			@railPadding = [
+				parseInt(@$rail.css("padding-top"), 10)
+				parseInt(@$rail.css("padding-bottom"), 10)
+			]
+
 			@createBar()
 
-		updatePosition: (top) ->
+		updateBarPosition: (top) ->
 			top = top || 0
 			percentage =  top / @onescroll.mostTop || 0
-			barTop = (@onescroll.$elWrapper.outerHeight() - @$bar.outerHeight()) * percentage
+			barTop = (@$railInner.outerHeight() - @$bar.outerHeight()) * percentage + @railPadding[0]
 			@$bar.css "top", barTop
 
 		createBar: ->
 			super
 			@$bar.draggable(
 				axis: "y"
-				containment: "parent"
+				containment: @$railInner
 				start: (ev) =>
 					console.log ev
 				drag: (ev) =>
@@ -63,9 +71,12 @@ do ($ = jQuery, window) ->
 				stop: (ev) =>
 					console.log ev
 			)
+			# Needed to update just in case, rail has padding of more than 0.
+			# Not doing this will result in bar to appear before the rail begins.
+			@updateBarPosition(0)
 
 		getPercentage: ->
-			parseInt(@$bar.css(@barEdge), 10) / (@onescroll.$elWrapper.outerHeight() - @$bar.outerHeight())
+			(parseInt(@$bar.css(@barEdge), 10) - @railPadding[0]) / (@$railInner.outerHeight() - @$bar.outerHeight())
 
 	# Horizontal scrollbar
 	class OnescrollHorizontal extends OnescrollGeneric
@@ -74,19 +85,25 @@ do ($ = jQuery, window) ->
 			settings.type = "Horizontal"
 			super @onescroll, settings
 			@createRail()
+
+			@railPadding = [
+				parseInt(@$rail.css("padding-left"), 10)
+				parseInt(@$rail.css("padding-right"), 10)
+			]
+
 			@createBar()
 
-		updatePosition: (top, left) ->
+		updateBarPosition: (top, left) ->
 			left = left || 0
 			percentage =  left / @onescroll.mostLeft || 0
-			barLeft = (@onescroll.$elWrapper.outerWidth() - @$bar.outerWidth()) * percentage
+			barLeft = (@$railInner.outerWidth() - @$bar.outerWidth()) * percentage + @railPadding[0]
 			@$bar.css "left", barLeft
 
 		createBar: ->
 			super
 			@$bar.draggable(
 				axis: "x"
-				containment: "parent"
+				containment: @$railInner
 				start: (ev) =>
 					console.log ev
 				drag: (ev) =>
@@ -94,9 +111,12 @@ do ($ = jQuery, window) ->
 				stop: (ev) =>
 					console.log ev
 			)
+			# Needed to update just in case, rail has padding of more than 0.
+			# Not doing this will result in bar to appear before the rail begins.
+			@updateBarPosition(null, 0)
 
 		getPercentage: ->
-			parseInt(@$bar.css(@barEdge), 10) / (@onescroll.$elWrapper.outerWidth() - @$bar.outerWidth())
+			(parseInt(@$bar.css(@barEdge), 10) - @railPadding[0]) / (@$railInner.outerWidth() - @$bar.outerWidth())
 
 
 	# Onescroll constructor
