@@ -16,7 +16,14 @@
       barHorizontalClassName: "" + pluginName + "-bar-h",
       barVerticalClassName: "" + pluginName + "-bar-v",
       height: "auto",
-      width: "auto"
+      width: "auto",
+      scrollbars: [
+        {
+          type: "VerticalRight"
+        }, {
+          type: "HorizontalBottom"
+        }
+      ]
     };
     OnescrollGeneric = (function() {
       function OnescrollGeneric(onescroll, options) {
@@ -24,7 +31,8 @@
         this.onescroll = onescroll;
         defaults = {
           type: "Vertical",
-          barEdge: "top"
+          barEdge: "top",
+          railPadding: ["0px", "8px"]
         };
         this.settings = $.extend({}, defaults, options);
         this.barEdge = this.settings.type === "Vertical" ? "top" : "left";

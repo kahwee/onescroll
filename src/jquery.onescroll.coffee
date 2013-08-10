@@ -18,6 +18,11 @@ do ($ = jQuery, window) ->
 		barVerticalClassName: "#{pluginName}-bar-v"
 		height: "auto"
 		width: "auto"
+		scrollbars: [{
+			type: "VerticalRight"
+		}, {
+			type: "HorizontalBottom"
+		}]
 
 	# Not intended to be used as it is.
 	class OnescrollGeneric
@@ -25,6 +30,7 @@ do ($ = jQuery, window) ->
 			defaults =
 				type: "Vertical" # Vertical must be in caps due to camelCase later
 				barEdge: "top"
+				railPadding: ["0px", "8px"]
 			@settings = $.extend {}, defaults, options
 			@barEdge = if @settings.type is "Vertical" then "top" else "left"
 			@railClassName = @onescroll.settings["rail#{@settings.type}ClassName"]
