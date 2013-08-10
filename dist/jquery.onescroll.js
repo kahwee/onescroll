@@ -1,8 +1,10 @@
 (function() {
-  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   (function($, window) {
-    var Onescroll, OnescrollVertical, defaults, pluginName;
+    var Onescroll, OnescrollGeneric, OnescrollVertical, defaults, pluginName;
     pluginName = "onescroll";
     defaults = {
       wrapperClassName: "" + pluginName + "-wrapper",
@@ -14,30 +16,48 @@
       height: "auto",
       width: "auto"
     };
-    OnescrollVertical = (function() {
-      function OnescrollVertical(onescroll, options) {
+    OnescrollGeneric = (function() {
+      function OnescrollGeneric(onescroll, options) {
         this.onescroll = onescroll;
+        defaults = {
+          type: "Vertical",
+          barEdge: "top"
+        };
         this.settings = $.extend({}, defaults, options);
-        this.barEdge = "top";
-        this.init();
+        this.barEdge = this.settings.type === "Vertical" ? "top" : "left";
+        this.railClassName = this.onescroll.settings["rail" + this.settings.type + "ClassName"];
+        this.barClassName = this.onescroll.settings["bar" + this.settings.type + "ClassName"];
       }
 
-      OnescrollVertical.prototype.init = function() {
-        this.createRail();
-        return this.createBar();
-      };
-
-      OnescrollVertical.prototype.createRail = function() {
-        this.$rail = $("<div class=\"" + this.onescroll.settings.railVerticalClassName + "\"></div>").uniqueId();
+      OnescrollGeneric.prototype.createRail = function() {
+        this.$rail = $("<div class=\"" + this.railClassName + "\"></div>").uniqueId();
         this.railId = this.$rail.get(0).id;
         return this.onescroll.$elWrapper.append(this.$rail);
       };
 
+      OnescrollGeneric.prototype.createBar = function() {
+        this.$bar = $("<div class=\"" + this.barClassName + "\"></div>").uniqueId();
+        this.barId = this.$bar.get(0).id;
+        return this.onescroll.$elWrapper.append(this.$bar);
+      };
+
+      return OnescrollGeneric;
+
+    })();
+    OnescrollVertical = (function(_super) {
+      __extends(OnescrollVertical, _super);
+
+      function OnescrollVertical(onescroll, options) {
+        this.onescroll = onescroll;
+        this.settings = $.extend({}, defaults, options);
+        OnescrollVertical.__super__.constructor.call(this, this.onescroll, this.settings);
+        this.createRail();
+        this.createBar();
+      }
+
       OnescrollVertical.prototype.createBar = function() {
         var _this = this;
-        this.$bar = $("<div class=\"" + this.onescroll.settings.barVerticalClassName + "\"></div>").uniqueId();
-        this.barId = this.$bar.get(0).id;
-        this.onescroll.$elWrapper.append(this.$bar);
+        OnescrollVertical.__super__.createBar.apply(this, arguments);
         return this.$bar.draggable({
           axis: "y",
           containment: "parent",
@@ -59,7 +79,7 @@
 
       return OnescrollVertical;
 
-    })();
+    })(OnescrollGeneric);
     Onescroll = (function() {
       function Onescroll(element, options) {
         this.element = element;
@@ -94,8 +114,6 @@
           this.$el.height("auto");
           this.$elWrapper = this.$elWrapper.parent().height();
         }
-        this.type = "vertical";
-        this.barEdge = this.type === "vertical" ? "top" : "left";
         this.mostTop = -(this.$el.outerHeight() - this.$elWrapper.outerHeight());
         this.mostLeft = -(this.$el.outerWidth() - this.$elWrapper.outerWidth());
         this.vertical = new OnescrollVertical(this);

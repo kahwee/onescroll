@@ -11,27 +11,40 @@ do ($ = jQuery, window) ->
 		height: "auto"
 		width: "auto"
 
-	class OnescrollVertical
+	# Not intended to be used as it is.
+	class OnescrollGeneric
 		constructor: (@onescroll, options) ->
+			defaults =
+				type: "Vertical" # Vertical must be in caps due to camelCase later
+				barEdge: "top"
 			@settings = $.extend {}, defaults, options
-			@barEdge = "top"
-			@init()
-
-		init: ->
-			@createRail()
-			@createBar()
+			@barEdge = if @settings.type is "Vertical" then "top" else "left"
+			@railClassName = @onescroll.settings["rail#{@settings.type}ClassName"]
+			@barClassName = @onescroll.settings["bar#{@settings.type}ClassName"]
 
 		createRail: ->
-			@$rail = $("<div class=\"#{@onescroll.settings.railVerticalClassName}\"></div>").uniqueId()
+			@$rail = $("<div class=\"#{@railClassName}\"></div>").uniqueId()
 			# Save the id, future reference
 			@railId = @$rail.get(0).id
 			@onescroll.$elWrapper.append(@$rail)
 
 		createBar: ->
-			@$bar = $("<div class=\"#{@onescroll.settings.barVerticalClassName}\"></div>").uniqueId()
+			@$bar = $("<div class=\"#{@barClassName}\"></div>").uniqueId()
 			# Save the id, future reference
 			@barId = @$bar.get(0).id
 			@onescroll.$elWrapper.append(@$bar)
+
+
+	#
+	class OnescrollVertical extends OnescrollGeneric
+		constructor: (@onescroll, options) ->
+			@settings = $.extend {}, defaults, options
+			super @onescroll, @settings
+			@createRail()
+			@createBar()
+
+		createBar: ->
+			super
 			@$bar.draggable(
 				axis: "y"
 				containment: "parent"
@@ -79,11 +92,6 @@ do ($ = jQuery, window) ->
 				@$el.height "auto"
 				@$elWrapper = @$elWrapper.parent().height()
 
-			# Place initialization logic here
-			# You already have access to the DOM element and the options via the instance,
-			# e.g., @element and @settings
-			@type = "vertical"
-			@barEdge = if @type is "vertical" then "top" else "left"
 
 
 			@mostTop = -(@$el.outerHeight() - @$elWrapper.outerHeight())
