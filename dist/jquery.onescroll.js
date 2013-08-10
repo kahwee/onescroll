@@ -1,11 +1,13 @@
 (function() {
   var __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   (function($, window) {
-    var Onescroll, OnescrollGeneric, OnescrollHorizontal, OnescrollVertical, defaults, pluginName;
+    var Onescroll, OnescrollGeneric, OnescrollHorizontal, OnescrollVertical, defaults, pluginName, validScrollbarTypes;
     pluginName = "onescroll";
+    validScrollbarTypes = ["Vertical", "VerticalRight", "VerticalLeft", "Horizontal", "HorizontalTop", "HorizontalBottom"];
     defaults = {
       wrapperClassName: "" + pluginName + "-wrapper",
       className: "" + pluginName,
@@ -34,16 +36,28 @@
       }
 
       OnescrollGeneric.prototype.createRail = function() {
-        this.$rail = $("<div class=\"" + this.railClassName + "\"></div>").uniqueId();
-        this.$railInner = $("<div class=\"" + this.railClassName + "-inner\"></div>");
+        this.$rail = $("<div class=\"" + this.railClassName + "\"></div>").uniqueId().css(this.settings.railCss);
+        this.$railInner = $("<div class=\"" + this.railClassName + "-inner\"></div>").css(this.settings.railInnerCss);
         this.$rail.append(this.$railInner);
         this.railId = this.$rail.get(0).id;
         return this.onescroll.$elWrapper.append(this.$rail);
       };
 
+      OnescrollGeneric.prototype.setBarPosition = function(position) {
+        if (this.settings.railCss[position] != null) {
+          return this.$bar.css(position, this.settings.railCss[position]);
+        }
+      };
+
       OnescrollGeneric.prototype.createBar = function() {
+        var pos, _i, _len, _ref;
         this.$bar = $("<div class=\"" + this.barClassName + "\"></div>").uniqueId();
         this.barId = this.$bar.get(0).id;
+        _ref = ["right", "top", "left", "bottom"];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          pos = _ref[_i];
+          this.setBarPosition(pos);
+        }
         return this.onescroll.$elWrapper.append(this.$bar);
       };
 
@@ -150,6 +164,7 @@
       function Onescroll(element, options) {
         this.element = element;
         this._onWheel = __bind(this._onWheel, this);
+        this.scrollbars = [];
         window.test = this.element;
         this.settings = $.extend({}, defaults, options);
         this.before = {};
@@ -168,7 +183,44 @@
         return this.$elWrapper = this.$el.parent();
       };
 
+      Onescroll.prototype.createScrollbar = function(options) {
+        var settings, type;
+        defaults = {
+          railCss: {},
+          railInnerCss: {},
+          barCss: {}
+        };
+        settings = $.extend({}, defaults, options);
+        type = options.type;
+        if (__indexOf.call(validScrollbarTypes, type) >= 0) {
+          switch (type) {
+            case "Vertical":
+              this.scrollbars.push(new OnescrollVertical(this, settings));
+              break;
+            case "VerticalRight":
+              settings.railCss.right = 0;
+              this.scrollbars.push(new OnescrollVertical(this, settings));
+              break;
+            case "VerticalLeft":
+              this.scrollbars.push(new OnescrollVertical(this, settings));
+              break;
+            case "Horizontal":
+              this.scrollbars.push(new OnescrollHorizontal(this, settings));
+              break;
+            case "HorizontalRight":
+              this.scrollbars.push(new OnescrollHorizontal(this, settings));
+              break;
+            case "HorizontalLeft":
+              this.scrollbars.push(new OnescrollHorizontal(this, settings));
+          }
+          return console.log("HSSS");
+        } else {
+          throw ("" + options.type + " is not supported. Supported types are: ") + validScrollbarTypes.join(', ');
+        }
+      };
+
       Onescroll.prototype.init = function() {
+        var scrollbar, _i, _len, _ref;
         this.createWrapper();
         this.before.elPosition = this.$el.css("position");
         this.$el.css("position", "absolute");
@@ -182,8 +234,11 @@
         }
         this.mostTop = -(this.$el.outerHeight() - this.$elWrapper.outerHeight());
         this.mostLeft = -(this.$el.outerWidth() - this.$elWrapper.outerWidth());
-        this.vertical = new OnescrollVertical(this);
-        this.horizontal = new OnescrollHorizontal(this);
+        _ref = this.settings.scrollbars;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          scrollbar = _ref[_i];
+          this.createScrollbar(scrollbar);
+        }
         window.$el = this.$el;
         window.$elWrapper = this.$elWrapper;
         return this.addEventListeners();
@@ -214,7 +269,6 @@
         left = parseInt(this.$el.css("left"), 10) || 0;
         effectiveTop = top + dY;
         effectiveLeft = left - dX;
-        console.log(d, dX, effectiveLeft);
         if (effectiveTop >= 0) {
           effectiveTop = 0;
         } else if (effectiveTop <= this.mostTop) {

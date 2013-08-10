@@ -50,7 +50,24 @@
 			$(function() {
 				window.demo = $("#demo").onescroll({
 					height: "200px",
-					width: "400px"
+					width: "400px",
+					scrollbars: [{
+						type: "VerticalLeft",
+						railPadding: ['2px', '3px'],
+						railCss: {
+
+						}
+					}, {
+						type: "VerticalRight",
+						railPadding: ['2px', '3px'],
+						railCss: {
+						}
+					}, {
+						type: "Horizontal",
+						railPadding: ['2px', '3px'],
+						railCss: {
+						}
+					}]
 				});
 			});
 		</script>

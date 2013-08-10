@@ -1,6 +1,14 @@
 do ($ = jQuery, window) ->
 
 	pluginName = "onescroll"
+	validScrollbarTypes = [
+		"Vertical" # For custom vertical
+		"VerticalRight"
+		"VerticalLeft"
+		"Horizontal" # For custom horizontal
+		"HorizontalTop"
+		"HorizontalBottom"
+	]
 	defaults =
 		wrapperClassName: "#{pluginName}-wrapper"
 		className: "#{pluginName}"
@@ -25,17 +33,22 @@ do ($ = jQuery, window) ->
 				@updateBarPosition(top, left)
 
 		createRail: ->
-			@$rail = $("<div class=\"#{@railClassName}\"></div>").uniqueId()
-			@$railInner = $("<div class=\"#{@railClassName}-inner\"></div>")
+			@$rail = $("<div class=\"#{@railClassName}\"></div>").uniqueId().css(@settings.railCss)
+			@$railInner = $("<div class=\"#{@railClassName}-inner\"></div>").css(@settings.railInnerCss)
 			@$rail.append @$railInner
 			# Save the id, future reference
 			@railId = @$rail.get(0).id
 			@onescroll.$elWrapper.append(@$rail)
 
+		setBarPosition: (position) ->
+			if @settings.railCss[position]?
+				@$bar.css position, @settings.railCss[position]
+
 		createBar: ->
 			@$bar = $("<div class=\"#{@barClassName}\"></div>").uniqueId()
 			# Save the id, future reference
 			@barId = @$bar.get(0).id
+			@setBarPosition pos for pos in ["right", "top", "left", "bottom"]
 			@onescroll.$elWrapper.append(@$bar)
 
 	# Vertical scrollbar
@@ -122,6 +135,7 @@ do ($ = jQuery, window) ->
 	# Onescroll constructor
 	class Onescroll
 		constructor: (@element, options) ->
+			@scrollbars = []
 			window.test = @element
 			@settings = $.extend {}, defaults, options
 			@before = {}
@@ -136,6 +150,35 @@ do ($ = jQuery, window) ->
 		createWrapper: ->
 			@$el = $(@element).addClass(@settings.className).wrap("<div class=\"#{@settings.wrapperClassName}\"></div>")
 			@$elWrapper = @$el.parent()
+
+		createScrollbar: (options) ->
+			defaults =
+				railCss: {}
+				railInnerCss: {}
+				barCss: {}
+			settings = $.extend {}, defaults, options
+			type = options.type
+			if type in validScrollbarTypes
+				switch type
+					when "Vertical"
+						@scrollbars.push new OnescrollVertical(@, settings)
+					when "VerticalRight"
+						settings.railCss.right = 0
+						@scrollbars.push new OnescrollVertical(@, settings)
+					when "VerticalLeft"
+						@scrollbars.push new OnescrollVertical(@, settings)
+					when "Horizontal"
+						@scrollbars.push new OnescrollHorizontal(@, settings)
+					when "HorizontalRight"
+						@scrollbars.push new OnescrollHorizontal(@, settings)
+					when "HorizontalLeft"
+						@scrollbars.push new OnescrollHorizontal(@, settings)
+
+
+				console.log "HSSS"
+			else
+				throw "#{options.type} is not supported. Supported types are: " + validScrollbarTypes.join(', ')
+
 
 		init: ->
 			@createWrapper();
@@ -155,9 +198,7 @@ do ($ = jQuery, window) ->
 			@mostTop = -(@$el.outerHeight() - @$elWrapper.outerHeight())
 			@mostLeft = -(@$el.outerWidth() - @$elWrapper.outerWidth())
 
-			@vertical = new OnescrollVertical(@)
-			@horizontal = new OnescrollHorizontal(@)
-
+			@createScrollbar(scrollbar) for scrollbar in @settings.scrollbars
 			window.$el = @$el
 			window.$elWrapper = @$elWrapper
 
@@ -183,7 +224,6 @@ do ($ = jQuery, window) ->
 			left = parseInt(@$el.css("left"), 10) || 0
 			effectiveTop = top + dY
 			effectiveLeft = left - dX
-			console.log d, dX, effectiveLeft
 			if effectiveTop >= 0
 				effectiveTop = 0
 			else if effectiveTop <= @mostTop
