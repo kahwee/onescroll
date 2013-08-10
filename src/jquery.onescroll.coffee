@@ -29,8 +29,14 @@ do ($ = jQuery, window) ->
 			@barEdge = if @settings.type is "Vertical" then "top" else "left"
 			@railClassName = @onescroll.settings["rail#{@settings.type}ClassName"]
 			@barClassName = @onescroll.settings["bar#{@settings.type}ClassName"]
-			@onescroll.$elWrapper.on "onescroll:scrolled", (ev, top, left) =>
-				@updateBarPosition(top, left)
+			@onescroll.$elWrapper.on "onescroll:scrolled", (ev, top, left, target) =>
+				if not target?
+					@updateBarPosition(top, left)
+				else
+					console.log target.barId, @barId, target.barId isnt @barId
+					if @barId isnt target.barId
+						console.log "new", top, left
+						@updateBarPosition(top, left)
 
 		createRail: ->
 			@$rail = $("<div class=\"#{@railClassName}\"></div>").uniqueId().css(@settings.railCss)
@@ -80,7 +86,7 @@ do ($ = jQuery, window) ->
 				start: (ev) =>
 					console.log ev
 				drag: (ev) =>
-					@onescroll.scrollTo(null, $(ev.target).position().top)
+					@onescroll.scrollTo(@, null, $(ev.target).position().top)
 				stop: (ev) =>
 					console.log ev
 			)
@@ -120,7 +126,7 @@ do ($ = jQuery, window) ->
 				start: (ev) =>
 					console.log ev
 				drag: (ev) =>
-					@onescroll.scrollTo($(ev.target).position().left, null)
+					@onescroll.scrollTo(@, $(ev.target).position().left, null)
 				stop: (ev) =>
 					console.log ev
 			)
@@ -212,11 +218,12 @@ do ($ = jQuery, window) ->
 			@$elWrapper.trigger("onescroll:mousewheel", d, dX, dY)
 			ev.preventDefault()
 
-		scrollTo: (left, top) ->
-			if !!top
-				@$el.css "top", @vertical.getPercentage() * @mostTop
-			if !!left
-				@$el.css "left", @horizontal.getPercentage() * @mostLeft
+		scrollTo: (context, left, top) ->
+			effectiveTop = if top? then context.getPercentage() * @mostTop else null
+			effectiveLeft = if left? then context.getPercentage() * @mostLeft else null
+			@$elWrapper.trigger "onescroll:scrolled", [effectiveTop, effectiveLeft, context]
+			@$el.css "top", effectiveTop
+			@$el.css "left", effectiveLeft
 
 		# This enables mouse wheel to be working.
 		scrollWheel: (d, dX, dY) ->
