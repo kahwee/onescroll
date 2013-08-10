@@ -97,12 +97,8 @@ do ($ = jQuery, window) ->
 			@$bar.draggable(
 				axis: "y"
 				containment: @$railInner
-				start: (ev) =>
-					console.log ev
 				drag: (ev) =>
 					@onescroll.scrollTo(@, null, $(ev.target).position().top)
-				stop: (ev) =>
-					console.log ev
 			)
 			# Needed to update just in case, rail has padding of more than 0.
 			# Not doing this will result in bar to appear before the rail begins.
@@ -137,12 +133,8 @@ do ($ = jQuery, window) ->
 			@$bar.draggable(
 				axis: "x"
 				containment: @$railInner
-				start: (ev) =>
-					console.log ev
 				drag: (ev) =>
 					@onescroll.scrollTo(@, $(ev.target).position().left, null)
-				stop: (ev) =>
-					console.log ev
 			)
 			# Needed to update just in case, rail has padding of more than 0.
 			# Not doing this will result in bar to appear before the rail begins.

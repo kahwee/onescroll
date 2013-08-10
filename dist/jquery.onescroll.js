@@ -124,14 +124,8 @@
         this.$bar.draggable({
           axis: "y",
           containment: this.$railInner,
-          start: function(ev) {
-            return console.log(ev);
-          },
           drag: function(ev) {
             return _this.onescroll.scrollTo(_this, null, $(ev.target).position().top);
-          },
-          stop: function(ev) {
-            return console.log(ev);
           }
         });
         return this.updateBarPosition(0);
@@ -177,14 +171,8 @@
         this.$bar.draggable({
           axis: "x",
           containment: this.$railInner,
-          start: function(ev) {
-            return console.log(ev);
-          },
           drag: function(ev) {
             return _this.onescroll.scrollTo(_this, $(ev.target).position().left, null);
-          },
-          stop: function(ev) {
-            return console.log(ev);
           }
         });
         return this.updateBarPosition(null, 0);
