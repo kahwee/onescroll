@@ -35,7 +35,7 @@ Onescroll is a scrollbar. Want more scrollbars? Just declare more.
 To access the Onescroll object:
 
 ```javascript
-yourElement.data('plugin_onescroll')
+yourJQueryElement.data('plugin_onescroll')
 ```
 
 ## Contributing

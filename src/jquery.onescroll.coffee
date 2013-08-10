@@ -37,12 +37,25 @@ do ($ = jQuery, window) ->
 						@updateBarPosition(top, left)
 
 		createRail: ->
+			console.log @settings.railPadding
 			@$rail = $("<div class=\"#{@railClassName}\"></div>").uniqueId().css(@settings.railCss)
 			@$railInner = $("<div class=\"#{@railClassName}-inner\"></div>").css(@settings.railInnerCss)
 			@$rail.append @$railInner
 			# Save the id, future reference
 			@railId = @$rail.get(0).id
 			@onescroll.$elWrapper.append(@$rail)
+
+		getBarBoxOffset: ->
+			parseInt(@$bar.css(@barEdge), 10)
+
+		getRailBoxOffset: ->
+			parseInt(@settings.railPadding[0], 10)
+
+		getCurrentBarBoxOffsetWithoutRailPadding: ->
+			@getBarBoxOffset() - @getRailBoxOffset()
+
+		_setBlah: ->
+			s
 
 		_setBarBoxOffset: (position) ->
 			if @settings.railCss[position]?
@@ -63,17 +76,15 @@ do ($ = jQuery, window) ->
 			super @onescroll, settings
 			@createRail()
 
-			@railPadding = [
-				parseInt(@$rail.css("padding-top"), 10)
-				parseInt(@$rail.css("padding-bottom"), 10)
-			]
+			@$rail.css "padding-top", @settings.railPadding[0]
+			@$rail.css "padding-bottom", @settings.railPadding[1]
 
 			@createBar()
 
 		updateBarPosition: (top) ->
 			if top?
 				percentage =  top / @onescroll.mostTop || 0
-				barTop = (@$railInner.outerHeight() - @$bar.outerHeight()) * percentage + @railPadding[0]
+				barTop = (@$railInner.outerHeight() - @$bar.outerHeight()) * percentage + parseInt(@settings.railPadding[0], 10)
 				@$bar.css "top", barTop
 
 		createBar: ->
@@ -93,7 +104,7 @@ do ($ = jQuery, window) ->
 			@updateBarPosition(0)
 
 		getPercentage: ->
-			(parseInt(@$bar.css(@barEdge), 10) - @railPadding[0]) / (@$railInner.outerHeight() - @$bar.outerHeight())
+			(@getBarBoxOffset() - @getRailBoxOffset()) / (@$railInner.outerHeight() - @$bar.outerHeight())
 
 	# Horizontal scrollbar
 	class OnescrollHorizontal extends OnescrollGeneric
@@ -103,17 +114,15 @@ do ($ = jQuery, window) ->
 			super @onescroll, settings
 			@createRail()
 
-			@railPadding = [
-				parseInt(@$rail.css("padding-left"), 10)
-				parseInt(@$rail.css("padding-right"), 10)
-			]
+			@$rail.css "padding-left", @settings.railPadding[0]
+			@$rail.css "padding-right", @settings.railPadding[1]
 
 			@createBar()
 
 		updateBarPosition: (top, left) ->
 			if left?
 				percentage =  left / @onescroll.mostLeft || 0
-				barLeft = (@$railInner.outerWidth() - @$bar.outerWidth()) * percentage + @railPadding[0]
+				barLeft = (@$railInner.outerWidth() - @$bar.outerWidth()) * percentage + parseInt(@settings.railPadding[0], 10)
 				@$bar.css "left", barLeft
 
 		createBar: ->
@@ -133,7 +142,7 @@ do ($ = jQuery, window) ->
 			@updateBarPosition(null, 0)
 
 		getPercentage: ->
-			(parseInt(@$bar.css(@barEdge), 10) - @railPadding[0]) / (@$railInner.outerWidth() - @$bar.outerWidth())
+			(@getBarBoxOffset() - @getRailBoxOffset()) / (@$railInner.outerWidth() - @$bar.outerWidth())
 
 
 	# Onescroll constructor

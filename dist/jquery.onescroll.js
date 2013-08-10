@@ -42,11 +42,28 @@
       }
 
       OnescrollGeneric.prototype.createRail = function() {
+        console.log(this.settings.railPadding);
         this.$rail = $("<div class=\"" + this.railClassName + "\"></div>").uniqueId().css(this.settings.railCss);
         this.$railInner = $("<div class=\"" + this.railClassName + "-inner\"></div>").css(this.settings.railInnerCss);
         this.$rail.append(this.$railInner);
         this.railId = this.$rail.get(0).id;
         return this.onescroll.$elWrapper.append(this.$rail);
+      };
+
+      OnescrollGeneric.prototype.getBarBoxOffset = function() {
+        return parseInt(this.$bar.css(this.barEdge), 10);
+      };
+
+      OnescrollGeneric.prototype.getRailBoxOffset = function() {
+        return parseInt(this.settings.railPadding[0], 10);
+      };
+
+      OnescrollGeneric.prototype.getCurrentBarBoxOffsetWithoutRailPadding = function() {
+        return this.getBarBoxOffset() - this.getRailBoxOffset();
+      };
+
+      OnescrollGeneric.prototype._setBlah = function() {
+        return s;
       };
 
       OnescrollGeneric.prototype._setBarBoxOffset = function(position) {
@@ -80,7 +97,8 @@
         settings.type = "Vertical";
         OnescrollVertical.__super__.constructor.call(this, this.onescroll, settings);
         this.createRail();
-        this.railPadding = [parseInt(this.$rail.css("padding-top"), 10), parseInt(this.$rail.css("padding-bottom"), 10)];
+        this.$rail.css("padding-top", this.settings.railPadding[0]);
+        this.$rail.css("padding-bottom", this.settings.railPadding[1]);
         this.createBar();
       }
 
@@ -88,7 +106,7 @@
         var barTop, percentage;
         if (top != null) {
           percentage = top / this.onescroll.mostTop || 0;
-          barTop = (this.$railInner.outerHeight() - this.$bar.outerHeight()) * percentage + this.railPadding[0];
+          barTop = (this.$railInner.outerHeight() - this.$bar.outerHeight()) * percentage + parseInt(this.settings.railPadding[0], 10);
           return this.$bar.css("top", barTop);
         }
       };
@@ -113,7 +131,7 @@
       };
 
       OnescrollVertical.prototype.getPercentage = function() {
-        return (parseInt(this.$bar.css(this.barEdge), 10) - this.railPadding[0]) / (this.$railInner.outerHeight() - this.$bar.outerHeight());
+        return (this.getBarBoxOffset() - this.getRailBoxOffset()) / (this.$railInner.outerHeight() - this.$bar.outerHeight());
       };
 
       return OnescrollVertical;
@@ -129,7 +147,8 @@
         settings.type = "Horizontal";
         OnescrollHorizontal.__super__.constructor.call(this, this.onescroll, settings);
         this.createRail();
-        this.railPadding = [parseInt(this.$rail.css("padding-left"), 10), parseInt(this.$rail.css("padding-right"), 10)];
+        this.$rail.css("padding-left", this.settings.railPadding[0]);
+        this.$rail.css("padding-right", this.settings.railPadding[1]);
         this.createBar();
       }
 
@@ -137,7 +156,7 @@
         var barLeft, percentage;
         if (left != null) {
           percentage = left / this.onescroll.mostLeft || 0;
-          barLeft = (this.$railInner.outerWidth() - this.$bar.outerWidth()) * percentage + this.railPadding[0];
+          barLeft = (this.$railInner.outerWidth() - this.$bar.outerWidth()) * percentage + parseInt(this.settings.railPadding[0], 10);
           return this.$bar.css("left", barLeft);
         }
       };
@@ -162,7 +181,7 @@
       };
 
       OnescrollHorizontal.prototype.getPercentage = function() {
-        return (parseInt(this.$bar.css(this.barEdge), 10) - this.railPadding[0]) / (this.$railInner.outerWidth() - this.$bar.outerWidth());
+        return (this.getBarBoxOffset() - this.getRailBoxOffset()) / (this.$railInner.outerWidth() - this.$bar.outerWidth());
       };
 
       return OnescrollHorizontal;
