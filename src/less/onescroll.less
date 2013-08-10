@@ -1,0 +1,33 @@
+@import "variables";
+
+.onescroll {
+}
+
+.onescroll-wrapper {
+	position: relative;
+	overflow: hidden;
+}
+
+.onescroll-rail-v {
+	width: @onescroll-rail-thickness;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	display: block;
+	border-radius: 3px;
+	background: @onescroll-rail-background;
+	opacity: .4;
+	z-index: @onescroll-rail-z-index;
+}
+
+.onescroll-bar-v {
+	width: @onescroll-bar-thickness;
+	height: 30px;
+	position: absolute;
+	top: 0;
+	display: block;
+	border-radius: 3px;
+	background: @onescroll-bar-background;
+	opacity: .4;
+	z-index: @onescroll-bar-z-index;
+}

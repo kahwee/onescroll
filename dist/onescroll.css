@@ -1,0 +1,26 @@
+.onescroll-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+.onescroll-rail-v {
+  width: 8px;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  display: block;
+  border-radius: 3px;
+  background: #aaaaaa;
+  opacity: .4;
+  z-index: 1001;
+}
+.onescroll-bar-v {
+  width: 8px;
+  height: 30px;
+  position: absolute;
+  top: 0;
+  display: block;
+  border-radius: 3px;
+  background: #00abdd;
+  opacity: .4;
+  z-index: 1002;
+}

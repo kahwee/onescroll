@@ -1,0 +1,32 @@
+{
+  "name": "jquery-onescroll",
+  "title": "jQuery Onescroll",
+  "description": "A scrollbar in the making.",
+  "author": "KahWee Teng",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/kahwee/onescroll.git"
+  },
+  "maintainers": [{
+    "name": "KahWee Teng",
+    "email": "t@kw.sg",
+    "url": "https://github.com/kahwee"
+  }],
+  "homepage": "https://github.com/kahwee/onescroll.git",
+  "version": "0.9.0",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-cli": "~0.1.7",
+    "grunt-contrib-jshint": "~0.4.3",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-uglify": "~0.2.0",
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-watch": "~0.5.1",
+    "grunt-contrib-copy": "~0.4.1",
+    "less": "~1.4.2",
+    "grunt-contrib-less": "~0.7.0"
+  },
+  "scripts": {
+    "test": "grunt travis --verbose"
+  }
+}
