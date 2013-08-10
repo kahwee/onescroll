@@ -18,16 +18,19 @@
     };
     OnescrollGeneric = (function() {
       function OnescrollGeneric(onescroll, options) {
+        var _this = this;
         this.onescroll = onescroll;
         defaults = {
           type: "Vertical",
           barEdge: "top"
         };
         this.settings = $.extend({}, defaults, options);
-        console.log(this.settings);
         this.barEdge = this.settings.type === "Vertical" ? "top" : "left";
         this.railClassName = this.onescroll.settings["rail" + this.settings.type + "ClassName"];
         this.barClassName = this.onescroll.settings["bar" + this.settings.type + "ClassName"];
+        this.onescroll.$elWrapper.on("onescroll:scrolled", function(ev, top, left) {
+          return _this.updatePosition(top, left);
+        });
       }
 
       OnescrollGeneric.prototype.createRail = function() {
@@ -57,6 +60,15 @@
         this.createRail();
         this.createBar();
       }
+
+      OnescrollVertical.prototype.updatePosition = function(top, left) {
+        var barTop, percentage;
+        if (top) {
+          percentage = top / this.onescroll.mostTop;
+          barTop = (this.onescroll.$elWrapper.outerHeight() - this.$bar.outerHeight()) * percentage;
+          return this.$bar.css("top", barTop);
+        }
+      };
 
       OnescrollVertical.prototype.createBar = function() {
         var _this = this;
@@ -95,6 +107,15 @@
         this.createRail();
         this.createBar();
       }
+
+      OnescrollHorizontal.prototype.updatePosition = function(top, left) {
+        var barLeft, percentage;
+        if (left) {
+          percentage = left / this.onescroll.mostLeft;
+          barLeft = (this.onescroll.$elWrapper.outerWidth() - this.$bar.outerWidth()) * percentage;
+          return this.$bar.css("left", barLeft);
+        }
+      };
 
       OnescrollHorizontal.prototype.createBar = function() {
         var _this = this;
@@ -169,7 +190,8 @@
       };
 
       Onescroll.prototype._onWheel = function(ev, d, dX, dY) {
-        return this.scrollWheel(d, dX, dY);
+        this.scrollWheel(d, dX, dY);
+        return this.$elWrapper.trigger("onescroll:mousewheel", d, dX, dY);
       };
 
       Onescroll.prototype.setScrollPercentage = function(bar) {
@@ -189,22 +211,19 @@
         left = parseInt(this.$el.css("left"), 10) || 0;
         effectiveTop = top + dY;
         effectiveLeft = left + dX;
-        console.log("effective", effectiveTop, effectiveLeft);
         if (effectiveTop >= 0) {
-          this.$el.css("top", 0);
+          effectiveTop = 0;
         } else if (effectiveTop <= this.mostTop) {
-          this.$el.css("top", this.mostTop);
-        } else {
-          this.$el.css("top", effectiveTop);
+          effectiveTop = this.mostTop;
         }
         if (effectiveLeft >= 0) {
-          this.$el.css("left", 0);
+          effectiveLeft = 0;
         } else if (effectiveLeft <= this.mostLeft) {
-          this.$el.css("left", this.mostLeft);
-        } else {
-          this.$el.css("left", effectiveLeft);
+          effectiveLeft = this.mostLeft;
         }
-        return console.log(d, dX, dY, top, left);
+        this.$el.css("top", effectiveTop);
+        this.$el.css("left", effectiveLeft);
+        return this.$elWrapper.trigger("onescroll:scrolled", effectiveTop, effectiveLeft);
       };
 
       Onescroll.prototype.scrollContent = function(y, isWheel, isJump) {

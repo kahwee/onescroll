@@ -18,10 +18,11 @@ do ($ = jQuery, window) ->
 				type: "Vertical" # Vertical must be in caps due to camelCase later
 				barEdge: "top"
 			@settings = $.extend {}, defaults, options
-			console.log @settings
 			@barEdge = if @settings.type is "Vertical" then "top" else "left"
 			@railClassName = @onescroll.settings["rail#{@settings.type}ClassName"]
 			@barClassName = @onescroll.settings["bar#{@settings.type}ClassName"]
+			@onescroll.$elWrapper.on "onescroll:scrolled", (ev, top, left) =>
+				@updatePosition(top, left)
 
 		createRail: ->
 			@$rail = $("<div class=\"#{@railClassName}\"></div>").uniqueId()
@@ -43,6 +44,12 @@ do ($ = jQuery, window) ->
 			super @onescroll, settings
 			@createRail()
 			@createBar()
+
+		updatePosition: (top, left) ->
+			if top
+				percentage =  top / @onescroll.mostTop
+				barTop = (@onescroll.$elWrapper.outerHeight() - @$bar.outerHeight()) * percentage
+				@$bar.css "top", barTop
 
 		createBar: ->
 			super
@@ -68,6 +75,12 @@ do ($ = jQuery, window) ->
 			super @onescroll, settings
 			@createRail()
 			@createBar()
+
+		updatePosition: (top, left) ->
+			if left
+				percentage =  left / @onescroll.mostLeft
+				barLeft = (@onescroll.$elWrapper.outerWidth() - @$bar.outerWidth()) * percentage
+				@$bar.css "left", barLeft
 
 		createBar: ->
 			super
@@ -119,7 +132,6 @@ do ($ = jQuery, window) ->
 				@$elWrapper = @$elWrapper.parent().height()
 
 
-
 			@mostTop = -(@$el.outerHeight() - @$elWrapper.outerHeight())
 			@mostLeft = -(@$el.outerWidth() - @$elWrapper.outerWidth())
 
@@ -136,6 +148,7 @@ do ($ = jQuery, window) ->
 
 		_onWheel: (ev, d, dX, dY) =>
 			@scrollWheel(d, dX, dY)
+			@$elWrapper.trigger("onescroll:mousewheel", d, dX, dY)
 
 		setScrollPercentage: (bar) ->
 			console.log('he')
@@ -151,23 +164,20 @@ do ($ = jQuery, window) ->
 			left = parseInt(@$el.css("left"), 10) || 0
 			effectiveTop = top + dY
 			effectiveLeft = left + dX
-			console.log("effective", effectiveTop, effectiveLeft)
-
 			if effectiveTop >= 0
-				@$el.css "top", 0
+				effectiveTop = 0
 			else if effectiveTop <= @mostTop
-				@$el.css "top", @mostTop
-			else
-				@$el.css "top", effectiveTop
+				effectiveTop = @mostTop
 
 			if effectiveLeft >= 0
-				@$el.css "left", 0
+				effectiveLeft = 0
 			else if effectiveLeft <= @mostLeft
-				@$el.css "left", @mostLeft
-			else
-				@$el.css "left", effectiveLeft
+				effectiveLeft = @mostLeft
 
-			console.log d, dX, dY, top, left
+			@$el.css "top", effectiveTop
+			@$el.css "left", effectiveLeft
+
+			@$elWrapper.trigger("onescroll:scrolled", effectiveTop, effectiveLeft)
 
 		scrollContent: (y, isWheel, isJump) ->
 			delta = y
