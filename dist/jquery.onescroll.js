@@ -212,15 +212,18 @@
               this.scrollbars.push(new OnescrollVertical(this, settings));
               break;
             case "VerticalLeft":
+              settings.railCss.left = 0;
               this.scrollbars.push(new OnescrollVertical(this, settings));
               break;
             case "Horizontal":
               this.scrollbars.push(new OnescrollHorizontal(this, settings));
               break;
-            case "HorizontalRight":
+            case "HorizontalTop":
+              settings.railCss.top = 0;
               this.scrollbars.push(new OnescrollHorizontal(this, settings));
               break;
-            case "HorizontalLeft":
+            case "HorizontalBottom":
+              settings.railCss.bottom = 0;
               this.scrollbars.push(new OnescrollHorizontal(this, settings));
           }
           return console.log("HSSS");

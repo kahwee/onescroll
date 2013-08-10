@@ -172,12 +172,15 @@ do ($ = jQuery, window) ->
 						settings.railCss.right = 0
 						@scrollbars.push new OnescrollVertical(@, settings)
 					when "VerticalLeft"
+						settings.railCss.left = 0
 						@scrollbars.push new OnescrollVertical(@, settings)
 					when "Horizontal"
 						@scrollbars.push new OnescrollHorizontal(@, settings)
-					when "HorizontalRight"
+					when "HorizontalTop"
+						settings.railCss.top = 0
 						@scrollbars.push new OnescrollHorizontal(@, settings)
-					when "HorizontalLeft"
+					when "HorizontalBottom"
+						settings.railCss.bottom = 0
 						@scrollbars.push new OnescrollHorizontal(@, settings)
 
 
