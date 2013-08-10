@@ -4,7 +4,7 @@
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   (function($, window) {
-    var Onescroll, OnescrollGeneric, OnescrollVertical, defaults, pluginName;
+    var Onescroll, OnescrollGeneric, OnescrollHorizontal, OnescrollVertical, defaults, pluginName;
     pluginName = "onescroll";
     defaults = {
       wrapperClassName: "" + pluginName + "-wrapper",
@@ -24,6 +24,7 @@
           barEdge: "top"
         };
         this.settings = $.extend({}, defaults, options);
+        console.log(this.settings);
         this.barEdge = this.settings.type === "Vertical" ? "top" : "left";
         this.railClassName = this.onescroll.settings["rail" + this.settings.type + "ClassName"];
         this.barClassName = this.onescroll.settings["bar" + this.settings.type + "ClassName"];
@@ -48,9 +49,11 @@
       __extends(OnescrollVertical, _super);
 
       function OnescrollVertical(onescroll, options) {
+        var settings;
         this.onescroll = onescroll;
-        this.settings = $.extend({}, defaults, options);
-        OnescrollVertical.__super__.constructor.call(this, this.onescroll, this.settings);
+        settings = $.extend({}, options);
+        settings.type = "Vertical";
+        OnescrollVertical.__super__.constructor.call(this, this.onescroll, settings);
         this.createRail();
         this.createBar();
       }
@@ -78,6 +81,44 @@
       };
 
       return OnescrollVertical;
+
+    })(OnescrollGeneric);
+    OnescrollHorizontal = (function(_super) {
+      __extends(OnescrollHorizontal, _super);
+
+      function OnescrollHorizontal(onescroll, options) {
+        var settings;
+        this.onescroll = onescroll;
+        settings = $.extend({}, options);
+        settings.type = "Horizontal";
+        OnescrollHorizontal.__super__.constructor.call(this, this.onescroll, settings);
+        this.createRail();
+        this.createBar();
+      }
+
+      OnescrollHorizontal.prototype.createBar = function() {
+        var _this = this;
+        OnescrollHorizontal.__super__.createBar.apply(this, arguments);
+        return this.$bar.draggable({
+          axis: "x",
+          containment: "parent",
+          start: function(ev) {
+            return console.log(ev);
+          },
+          drag: function(ev) {
+            return _this.onescroll.scrollTo($(ev.target).position().left, null);
+          },
+          stop: function(ev) {
+            return console.log(ev);
+          }
+        });
+      };
+
+      OnescrollHorizontal.prototype.getPercentage = function() {
+        return parseInt(this.$bar.css(this.barEdge), 10) / (this.onescroll.$elWrapper.outerWidth() - this.$bar.outerWidth());
+      };
+
+      return OnescrollHorizontal;
 
     })(OnescrollGeneric);
     Onescroll = (function() {
@@ -117,6 +158,7 @@
         this.mostTop = -(this.$el.outerHeight() - this.$elWrapper.outerHeight());
         this.mostLeft = -(this.$el.outerWidth() - this.$elWrapper.outerWidth());
         this.vertical = new OnescrollVertical(this);
+        this.horizontal = new OnescrollHorizontal(this);
         window.$el = this.$el;
         window.$elWrapper = this.$elWrapper;
         return this.addEventListeners();

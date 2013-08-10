@@ -18,6 +18,7 @@ do ($ = jQuery, window) ->
 				type: "Vertical" # Vertical must be in caps due to camelCase later
 				barEdge: "top"
 			@settings = $.extend {}, defaults, options
+			console.log @settings
 			@barEdge = if @settings.type is "Vertical" then "top" else "left"
 			@railClassName = @onescroll.settings["rail#{@settings.type}ClassName"]
 			@barClassName = @onescroll.settings["bar#{@settings.type}ClassName"]
@@ -34,12 +35,12 @@ do ($ = jQuery, window) ->
 			@barId = @$bar.get(0).id
 			@onescroll.$elWrapper.append(@$bar)
 
-
-	#
+	# Vertical scrollbar
 	class OnescrollVertical extends OnescrollGeneric
 		constructor: (@onescroll, options) ->
-			@settings = $.extend {}, defaults, options
-			super @onescroll, @settings
+			settings = $.extend {}, options
+			settings.type = "Vertical"
+			super @onescroll, settings
 			@createRail()
 			@createBar()
 
@@ -58,6 +59,31 @@ do ($ = jQuery, window) ->
 
 		getPercentage: ->
 			parseInt(@$bar.css(@barEdge), 10) / (@onescroll.$elWrapper.outerHeight() - @$bar.outerHeight())
+
+	# Horizontal scrollbar
+	class OnescrollHorizontal extends OnescrollGeneric
+		constructor: (@onescroll, options) ->
+			settings = $.extend {}, options
+			settings.type = "Horizontal"
+			super @onescroll, settings
+			@createRail()
+			@createBar()
+
+		createBar: ->
+			super
+			@$bar.draggable(
+				axis: "x"
+				containment: "parent"
+				start: (ev) =>
+					console.log ev
+				drag: (ev) =>
+					@onescroll.scrollTo($(ev.target).position().left, null)
+				stop: (ev) =>
+					console.log ev
+			)
+
+		getPercentage: ->
+			parseInt(@$bar.css(@barEdge), 10) / (@onescroll.$elWrapper.outerWidth() - @$bar.outerWidth())
 
 
 	# Onescroll constructor
@@ -98,6 +124,7 @@ do ($ = jQuery, window) ->
 			@mostLeft = -(@$el.outerWidth() - @$elWrapper.outerWidth())
 
 			@vertical = new OnescrollVertical(@)
+			@horizontal = new OnescrollHorizontal(@)
 
 			window.$el = @$el
 			window.$elWrapper = @$elWrapper

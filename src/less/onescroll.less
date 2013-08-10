@@ -8,26 +8,44 @@
 	overflow: hidden;
 }
 
-.onescroll-rail-v {
-	width: @onescroll-rail-thickness;
-	height: 100%;
+.onescroll-rail-v, .onescroll-bar-v,
+.onescroll-rail-h, .onescroll-bar-h {
 	position: absolute;
-	top: 0;
 	display: block;
 	border-radius: 3px;
+}
+.onescroll-rail-v, .onescroll-rail-h {
 	background: @onescroll-rail-background;
 	opacity: .4;
 	z-index: @onescroll-rail-z-index;
 }
 
-.onescroll-bar-v {
-	width: @onescroll-bar-thickness;
-	height: 30px;
-	position: absolute;
-	top: 0;
-	display: block;
-	border-radius: 3px;
+.onescroll-bar-v, .onescroll-bar-h {
 	background: @onescroll-bar-background;
 	opacity: .4;
 	z-index: @onescroll-bar-z-index;
+}
+
+.onescroll-rail-v {
+	width: @onescroll-rail-thickness;
+	height: 100%;
+	top: 0;
+}
+
+.onescroll-bar-v {
+	width: @onescroll-bar-thickness;
+	height: 30px;
+	top: 0;
+}
+
+.onescroll-rail-h {
+	width: 100%;
+	height: @onescroll-rail-thickness;
+	left: 0;
+}
+
+.onescroll-bar-h {
+	width: 30px;
+	height: @onescroll-bar-thickness;
+	left: 0;
 }
