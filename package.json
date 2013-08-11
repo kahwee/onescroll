@@ -13,7 +13,7 @@
     "url": "https://github.com/kahwee"
   }],
   "homepage": "https://github.com/kahwee/onescroll.git",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-cli": "~0.1.7",
