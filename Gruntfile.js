@@ -84,7 +84,7 @@ module.exports = function(grunt) {
 					srcPath + "/**/*.coffee",
 					srcPath + "/**/*.less",
 				],
-				tasks: ["coffee", "less:dev"],
+				tasks: ["coffee", "less:dev", "uglify"],
 				options: {
 					interrupt: true,
 				},

@@ -97,8 +97,12 @@ do ($ = jQuery, window) ->
 
 		createBar: ->
 			super
+			railInnerOHt = @$railInner.outerHeight()
 			if not @scrollSettings.barCss.height?
-				@$bar.height Math.ceil(@onescroll.$elWrapper.height() / @onescroll.$el.height() * @$railInner.outerHeight())
+				if @onescroll.$el.height() <= railInnerOHt
+					@$bar.height railInnerOHt
+				else
+					@$bar.height Math.ceil(@onescroll.$elWrapper.height() / @onescroll.$el.height() * railInnerOHt)
 			@$bar.draggable(
 				axis: "y"
 				containment: @$railInner
@@ -242,6 +246,8 @@ do ($ = jQuery, window) ->
 			left = parseInt(@$el.css("left"), 10) || 0
 			effectiveTop = top + dY
 			effectiveLeft = left - dX
+			if @$el.height() <= @$elWrapper.height()
+				return ev
 			if effectiveTop >= 0
 				effectiveTop = 0
 			else if effectiveTop <= @mostTop
@@ -258,6 +264,7 @@ do ($ = jQuery, window) ->
 			@$el.css "left", effectiveLeft
 
 			@$elWrapper.trigger "onescroll:scrolled", [effectiveTop, effectiveLeft]
+			ev
 
 	# A really lightweight plugin wrapper around the constructor,
 	# preventing against multiple instantiations

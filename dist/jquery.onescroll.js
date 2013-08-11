@@ -115,10 +115,16 @@
       };
 
       OnescrollVertical.prototype.createBar = function() {
-        var _this = this;
+        var railInnerOHt,
+          _this = this;
         OnescrollVertical.__super__.createBar.apply(this, arguments);
+        railInnerOHt = this.$railInner.outerHeight();
         if (this.scrollSettings.barCss.height == null) {
-          this.$bar.height(Math.ceil(this.onescroll.$elWrapper.height() / this.onescroll.$el.height() * this.$railInner.outerHeight()));
+          if (this.onescroll.$el.height() <= railInnerOHt) {
+            this.$bar.height(railInnerOHt);
+          } else {
+            this.$bar.height(Math.ceil(this.onescroll.$elWrapper.height() / this.onescroll.$el.height() * railInnerOHt));
+          }
         }
         this.$bar.draggable({
           axis: "y",
@@ -290,6 +296,9 @@
         left = parseInt(this.$el.css("left"), 10) || 0;
         effectiveTop = top + dY;
         effectiveLeft = left - dX;
+        if (this.$el.height() <= this.$elWrapper.height()) {
+          return ev;
+        }
         if (effectiveTop >= 0) {
           effectiveTop = 0;
         } else if (effectiveTop <= this.mostTop) {
@@ -304,7 +313,8 @@
         }
         this.$el.css("top", effectiveTop);
         this.$el.css("left", effectiveLeft);
-        return this.$elWrapper.trigger("onescroll:scrolled", [effectiveTop, effectiveLeft]);
+        this.$elWrapper.trigger("onescroll:scrolled", [effectiveTop, effectiveLeft]);
+        return ev;
       };
 
       return Onescroll;
