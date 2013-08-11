@@ -35,10 +35,10 @@
           barEdge: "top",
           railPadding: ["0px", "8px"]
         };
-        this.settings3 = $.extend({}, scrollDefaults, options);
-        this.barEdge = this.settings3.type === "Vertical" ? "top" : "left";
-        this.railClassName = this.onescroll.settings["rail" + this.settings3.type + "ClassName"];
-        this.barClassName = this.onescroll.settings["bar" + this.settings3.type + "ClassName"];
+        this.scrollSettings = $.extend({}, scrollDefaults, options);
+        this.barEdge = this.scrollSettings.type === "Vertical" ? "top" : "left";
+        this.railClassName = this.onescroll.settings["rail" + this.scrollSettings.type + "ClassName"];
+        this.barClassName = this.onescroll.settings["bar" + this.scrollSettings.type + "ClassName"];
         this.onescroll.$elWrapper.on("onescroll:scrolled", function(ev, top, left, target) {
           if (target == null) {
             return _this.updateBarPosition(top, left);
@@ -51,9 +51,8 @@
       }
 
       OnescrollGeneric.prototype.createRail = function() {
-        this.$rail = $("<div class=\"" + this.railClassName + "\"></div>").uniqueId().css(this.settings3.railCss);
-        this.$railInner = $("<div class=\"" + this.railClassName + "-inner\"></div>").css(this.settings3.railInnerCss);
-        this.$rail.append(this.$railInner);
+        this.$rail = $("<div class=\"" + this.railClassName + "\"></div>").uniqueId().css(this.scrollSettings.railCss);
+        this.$railInner = $("<div class=\"" + this.railClassName + "-inner\"></div>").css(this.scrollSettings.railInnerCss).appendTo(this.$rail);
         this.railId = this.$rail.get(0).id;
         return this.onescroll.$elWrapper.append(this.$rail);
       };
@@ -63,7 +62,7 @@
       };
 
       OnescrollGeneric.prototype.getRailBoxOffset = function() {
-        return parseInt(this.settings3.railPadding[0], 10);
+        return parseInt(this.scrollSettings.railPadding[0], 10);
       };
 
       OnescrollGeneric.prototype.getCurrentBarBoxOffsetWithoutRailPadding = function() {
@@ -71,14 +70,14 @@
       };
 
       OnescrollGeneric.prototype._setBarBoxOffset = function(position) {
-        if (this.settings3.railCss[position] != null) {
-          return this.$bar.css(position, this.settings3.railCss[position]);
+        if (this.scrollSettings.railCss[position] != null) {
+          return this.$bar.css(position, this.scrollSettings.railCss[position]);
         }
       };
 
       OnescrollGeneric.prototype.createBar = function() {
         var pos, _i, _len, _ref;
-        this.$bar = $("<div class=\"" + this.barClassName + "\"></div>").uniqueId();
+        this.$bar = $("<div class=\"" + this.barClassName + "\"></div>").uniqueId().css(this.scrollSettings.barCss);
         this.barId = this.$bar.get(0).id;
         _ref = ["right", "top", "left", "bottom"];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -101,8 +100,8 @@
         settings.type = "Vertical";
         OnescrollVertical.__super__.constructor.call(this, this.onescroll, settings);
         this.createRail();
-        this.$rail.css("padding-top", this.settings3.railPadding[0]);
-        this.$rail.css("padding-bottom", this.settings3.railPadding[1]);
+        this.$rail.css("padding-top", this.scrollSettings.railPadding[0]);
+        this.$rail.css("padding-bottom", this.scrollSettings.railPadding[1]);
         this.createBar();
       }
 
@@ -110,7 +109,7 @@
         var barTop, percentage;
         if (top != null) {
           percentage = top / this.onescroll.mostTop || 0;
-          barTop = (this.$railInner.outerHeight() - this.$bar.outerHeight()) * percentage + parseInt(this.settings3.railPadding[0], 10);
+          barTop = (this.$railInner.outerHeight() - this.$bar.outerHeight()) * percentage + parseInt(this.scrollSettings.railPadding[0], 10);
           return this.$bar.css("top", barTop);
         }
       };
@@ -118,7 +117,7 @@
       OnescrollVertical.prototype.createBar = function() {
         var _this = this;
         OnescrollVertical.__super__.createBar.apply(this, arguments);
-        if (this.settings3.barCss.height == null) {
+        if (this.scrollSettings.barCss.height == null) {
           this.$bar.height(Math.ceil(this.onescroll.$elWrapper.height() / this.onescroll.$el.height() * this.$railInner.outerHeight()));
         }
         this.$bar.draggable({
@@ -148,8 +147,8 @@
         settings.type = "Horizontal";
         OnescrollHorizontal.__super__.constructor.call(this, this.onescroll, settings);
         this.createRail();
-        this.$rail.css("padding-left", this.settings3.railPadding[0]);
-        this.$rail.css("padding-right", this.settings3.railPadding[1]);
+        this.$rail.css("padding-left", this.scrollSettings.railPadding[0]);
+        this.$rail.css("padding-right", this.scrollSettings.railPadding[1]);
         this.createBar();
       }
 
@@ -157,7 +156,7 @@
         var barLeft, percentage;
         if (left != null) {
           percentage = left / this.onescroll.mostLeft || 0;
-          barLeft = (this.$railInner.outerWidth() - this.$bar.outerWidth()) * percentage + parseInt(this.settings3.railPadding[0], 10);
+          barLeft = (this.$railInner.outerWidth() - this.$bar.outerWidth()) * percentage + parseInt(this.scrollSettings.railPadding[0], 10);
           return this.$bar.css("left", barLeft);
         }
       };
@@ -165,7 +164,7 @@
       OnescrollHorizontal.prototype.createBar = function() {
         var _this = this;
         OnescrollHorizontal.__super__.createBar.apply(this, arguments);
-        if (this.settings3.barCss.width == null) {
+        if (this.scrollSettings.barCss.width == null) {
           this.$bar.width(Math.ceil(this.onescroll.$elWrapper.width() / this.onescroll.$el.width() * this.$railInner.outerWidth()));
         }
         this.$bar.draggable({
@@ -204,7 +203,9 @@
 
       Onescroll.prototype.createWrapper = function() {
         this.$el = $(this.element).addClass(this.settings.className).wrap("<div class=\"" + this.settings.wrapperClassName + "\"></div>");
-        return this.$elWrapper = this.$el.parent();
+        this.$elWrapper = this.$el.parent();
+        this.$elWrapper.height(this.settings.height);
+        return this.$elWrapper.width(this.settings.width);
       };
 
       Onescroll.prototype.createScrollbar = function(options) {

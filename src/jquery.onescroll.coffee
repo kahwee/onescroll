@@ -32,10 +32,10 @@ do ($ = jQuery, window) ->
 				type: "Vertical" # Vertical must be in caps due to camelCase later
 				barEdge: "top"
 				railPadding: ["0px", "8px"]
-			@settings3 = $.extend {}, scrollDefaults, options
-			@barEdge = if @settings3.type is "Vertical" then "top" else "left"
-			@railClassName = @onescroll.settings["rail#{@settings3.type}ClassName"]
-			@barClassName = @onescroll.settings["bar#{@settings3.type}ClassName"]
+			@scrollSettings = $.extend {}, scrollDefaults, options
+			@barEdge = if @scrollSettings.type is "Vertical" then "top" else "left"
+			@railClassName = @onescroll.settings["rail#{@scrollSettings.type}ClassName"]
+			@barClassName = @onescroll.settings["bar#{@scrollSettings.type}ClassName"]
 			@onescroll.$elWrapper.on "onescroll:scrolled", (ev, top, left, target) =>
 				if not target?
 					@updateBarPosition(top, left)
@@ -44,9 +44,12 @@ do ($ = jQuery, window) ->
 						@updateBarPosition(top, left)
 
 		createRail: ->
-			@$rail = $("<div class=\"#{@railClassName}\"></div>").uniqueId().css(@settings3.railCss)
-			@$railInner = $("<div class=\"#{@railClassName}-inner\"></div>").css(@settings3.railInnerCss)
-			@$rail.append @$railInner
+			@$rail = $("<div class=\"#{@railClassName}\"></div>")
+				.uniqueId()
+				.css(@scrollSettings.railCss)
+			@$railInner = $("<div class=\"#{@railClassName}-inner\"></div>")
+				.css(@scrollSettings.railInnerCss)
+				.appendTo(@$rail)
 			# Save the id, future reference
 			@railId = @$rail.get(0).id
 			@onescroll.$elWrapper.append(@$rail)
@@ -55,17 +58,19 @@ do ($ = jQuery, window) ->
 			parseInt(@$bar.css(@barEdge), 10)
 
 		getRailBoxOffset: ->
-			parseInt(@settings3.railPadding[0], 10)
+			parseInt(@scrollSettings.railPadding[0], 10)
 
 		getCurrentBarBoxOffsetWithoutRailPadding: ->
 			@getBarBoxOffset() - @getRailBoxOffset()
 
 		_setBarBoxOffset: (position) ->
-			if @settings3.railCss[position]?
-				@$bar.css position, @settings3.railCss[position]
+			if @scrollSettings.railCss[position]?
+				@$bar.css position, @scrollSettings.railCss[position]
 
 		createBar: ->
-			@$bar = $("<div class=\"#{@barClassName}\"></div>").uniqueId()
+			@$bar = $("<div class=\"#{@barClassName}\"></div>")
+				.uniqueId()
+				.css(@scrollSettings.barCss)
 			# Save the id, future reference
 			@barId = @$bar.get(0).id
 			@_setBarBoxOffset pos for pos in ["right", "top", "left", "bottom"]
@@ -79,20 +84,20 @@ do ($ = jQuery, window) ->
 			super @onescroll, settings
 			@createRail()
 
-			@$rail.css "padding-top", @settings3.railPadding[0]
-			@$rail.css "padding-bottom", @settings3.railPadding[1]
+			@$rail.css "padding-top", @scrollSettings.railPadding[0]
+			@$rail.css "padding-bottom", @scrollSettings.railPadding[1]
 
 			@createBar()
 
 		updateBarPosition: (top) ->
 			if top?
 				percentage =  top / @onescroll.mostTop || 0
-				barTop = (@$railInner.outerHeight() - @$bar.outerHeight()) * percentage + parseInt(@settings3.railPadding[0], 10)
+				barTop = (@$railInner.outerHeight() - @$bar.outerHeight()) * percentage + parseInt(@scrollSettings.railPadding[0], 10)
 				@$bar.css "top", barTop
 
 		createBar: ->
 			super
-			if not @settings3.barCss.height?
+			if not @scrollSettings.barCss.height?
 				@$bar.height Math.ceil(@onescroll.$elWrapper.height() / @onescroll.$el.height() * @$railInner.outerHeight())
 			@$bar.draggable(
 				axis: "y"
@@ -115,20 +120,20 @@ do ($ = jQuery, window) ->
 			super @onescroll, settings
 			@createRail()
 
-			@$rail.css "padding-left", @settings3.railPadding[0]
-			@$rail.css "padding-right", @settings3.railPadding[1]
+			@$rail.css "padding-left", @scrollSettings.railPadding[0]
+			@$rail.css "padding-right", @scrollSettings.railPadding[1]
 
 			@createBar()
 
 		updateBarPosition: (top, left) ->
 			if left?
 				percentage =  left / @onescroll.mostLeft || 0
-				barLeft = (@$railInner.outerWidth() - @$bar.outerWidth()) * percentage + parseInt(@settings3.railPadding[0], 10)
+				barLeft = (@$railInner.outerWidth() - @$bar.outerWidth()) * percentage + parseInt(@scrollSettings.railPadding[0], 10)
 				@$bar.css "left", barLeft
 
 		createBar: ->
 			super
-			if not @settings3.barCss.width?
+			if not @scrollSettings.barCss.width?
 				@$bar.width Math.ceil(@onescroll.$elWrapper.width() / @onescroll.$el.width() * @$railInner.outerWidth())
 			@$bar.draggable(
 				axis: "x"
@@ -161,6 +166,8 @@ do ($ = jQuery, window) ->
 		createWrapper: ->
 			@$el = $(@element).addClass(@settings.className).wrap("<div class=\"#{@settings.wrapperClassName}\"></div>")
 			@$elWrapper = @$el.parent()
+			@$elWrapper.height(@settings.height)
+			@$elWrapper.width(@settings.width)
 
 		createScrollbar: (options) ->
 			scrollbarDefaults =

@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<title>jQuery Onescroll</title>
-    <link href="../dist/onescroll.css" rel="stylesheet" type="text/css" />
+		<link href="../dist/onescroll.css" rel="stylesheet" type="text/css" />
 		<script src="../dist/jquery.js"></script>
 		<script src="../dist/jquery-ui.js"></script>
 		<script src="../dist/jquery.mousewheel.js"></script>
@@ -107,8 +107,25 @@ window.demo1 = $("#demo1").onescroll({
 				window.demo1 = $("#demo1").onescroll({
 					height: "200px"
 				});
-				window.demo2 = $("#demo2").onescroll({
-					height: "200px"
+				$("#demo2").onescroll({
+					height: "200px",
+					width: "900px",
+					scrollbars: [{
+						type: "Vertical",
+						railPadding: ["2px", "2px"],
+						railCss: {
+							left: "2px",
+							opacity: 1,
+						},
+						railInnerCss: {
+							background: "#444",
+							opacity: 1,
+						},
+						barCss: {
+							background: "#ff51b9",
+							opacity: 1,
+						}
+					}]
 				});
 			});
 		</script>
