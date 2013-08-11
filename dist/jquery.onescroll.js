@@ -271,9 +271,8 @@
       };
 
       Onescroll.prototype._onWheel = function(ev, d, dX, dY) {
-        this.scrollWheel(d, dX, dY);
-        this.$elWrapper.trigger("onescroll:mousewheel", d, dX, dY);
-        return ev.preventDefault();
+        this.scrollWheel(ev, d, dX, dY);
+        return this.$elWrapper.trigger("onescroll:mousewheel", d, dX, dY);
       };
 
       Onescroll.prototype.scrollTo = function(context, left, top) {
@@ -285,7 +284,7 @@
         return this.$el.css("left", effectiveLeft);
       };
 
-      Onescroll.prototype.scrollWheel = function(d, dX, dY) {
+      Onescroll.prototype.scrollWheel = function(ev, d, dX, dY) {
         var effectiveLeft, effectiveTop, left, top;
         top = parseInt(this.$el.css("top"), 10) || 0;
         left = parseInt(this.$el.css("left"), 10) || 0;
@@ -295,6 +294,8 @@
           effectiveTop = 0;
         } else if (effectiveTop <= this.mostTop) {
           effectiveTop = this.mostTop;
+        } else {
+          ev.preventDefault();
         }
         if (effectiveLeft >= 0) {
           effectiveLeft = 0;

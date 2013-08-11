@@ -1,6 +1,6 @@
-## Simple scrollbar
+## Onescroll
 
-Onescroll is a scrollbar. Want more scrollbars? Just declare more.
+A customizable scrollbar solution for jQuery.
 
 ## Dependencies
 
@@ -79,6 +79,14 @@ To access the Onescroll object:
 ```javascript
 yourJQueryElement.data('plugin_onescroll')
 ```
+## Browser support
+
+I have only tested this in the latest browsers.
+
+* Chrome
+* Firefox
+* Internet Explorer (Only tested in IE10)
+* Safari
 
 ## Contributing
 

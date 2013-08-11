@@ -226,9 +226,8 @@ do ($ = jQuery, window) ->
 			@$elWrapper.on("mousewheel", @_onWheel)
 
 		_onWheel: (ev, d, dX, dY) =>
-			@scrollWheel(d, dX, dY)
+			@scrollWheel(ev, d, dX, dY)
 			@$elWrapper.trigger("onescroll:mousewheel", d, dX, dY)
-			ev.preventDefault()
 
 		scrollTo: (context, left, top) ->
 			effectiveTop = if top? then context.getPercentage() * @mostTop else null
@@ -238,7 +237,7 @@ do ($ = jQuery, window) ->
 			@$el.css "left", effectiveLeft
 
 		# This enables mouse wheel to be working.
-		scrollWheel: (d, dX, dY) ->
+		scrollWheel: (ev, d, dX, dY) ->
 			top = parseInt(@$el.css("top"), 10) || 0
 			left = parseInt(@$el.css("left"), 10) || 0
 			effectiveTop = top + dY
@@ -247,6 +246,8 @@ do ($ = jQuery, window) ->
 				effectiveTop = 0
 			else if effectiveTop <= @mostTop
 				effectiveTop = @mostTop
+			else
+				ev.preventDefault()
 
 			if effectiveLeft >= 0
 				effectiveLeft = 0
