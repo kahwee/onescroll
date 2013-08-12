@@ -30,10 +30,10 @@ do ($ = jQuery, window) ->
 		constructor: (@onescroll, options) ->
 			scrollDefaults =
 				type: "Vertical" # Vertical must be in caps due to camelCase later
-				barEdge: "top"
 				railPadding: ["0px", "8px"]
 			@scrollSettings = $.extend {}, scrollDefaults, options
-			@barEdge = if @scrollSettings.type is "Vertical" then "top" else "left"
+			[@edgesName, @edgesNameCap] = if @scrollSettings.type is "Vertical" then [["top", "bottom"], ["Top", "Bottom"]] else [["left", "right"], ["Left", "Right"]]
+			[@lengthName, @lengthNameCap] = if @scrollSettings.type is "Vertical" then ["height", "Height"] else ["width", "Width"]
 			@railClassName = @onescroll.settings["rail#{@scrollSettings.type}ClassName"]
 			@barClassName = @onescroll.settings["bar#{@scrollSettings.type}ClassName"]
 			@onescroll.$elWrapper.on "onescroll:scrolled", (ev, top, left, target) =>
@@ -53,12 +53,20 @@ do ($ = jQuery, window) ->
 			# Save the id, future reference
 			@railId = @$rail.get(0).id
 			@onescroll.$elWrapper.append(@$rail)
+			@$rail.css "padding-#{@edgesName[0]}", @scrollSettings.railPadding[0]
+			@$rail.css "padding-#{@edgesName[1]}", @scrollSettings.railPadding[1]
 
 		getBarBoxOffset: ->
-			parseInt(@$bar.css(@barEdge), 10)
+			parseInt(@$bar.css(@edgesName[0]), 10)
 
 		getRailBoxOffset: ->
 			parseInt(@scrollSettings.railPadding[0], 10)
+
+		refreshBarSize: ->
+			if not @scrollSettings.barCss[@lengthName]?
+				barPropotionToRail = parseInt(@onescroll.$elWrapper.css(@lengthName), 10) / parseInt(@onescroll.$canvas.css(@lengthName), 10)
+				barPropotionToRail = if barPropotionToRail > 1 then 1 else barPropotionToRail
+				@$bar.css @lengthName, Math.ceil(barPropotionToRail * @$railInner.get(0)["offset#{@lengthNameCap}"])
 
 		getCurrentBarBoxOffsetWithoutRailPadding: ->
 			@getBarBoxOffset() - @getRailBoxOffset()
@@ -75,6 +83,7 @@ do ($ = jQuery, window) ->
 			@barId = @$bar.get(0).id
 			@_setBarBoxOffset pos for pos in ["right", "top", "left", "bottom"]
 			@onescroll.$elWrapper.append(@$bar)
+			@refreshBarSize()
 
 	# Vertical scrollbar
 	class OnescrollVertical extends OnescrollGeneric
@@ -83,10 +92,6 @@ do ($ = jQuery, window) ->
 			settings.type = "Vertical"
 			super @onescroll, settings
 			@createRail()
-
-			@$rail.css "padding-top", @scrollSettings.railPadding[0]
-			@$rail.css "padding-bottom", @scrollSettings.railPadding[1]
-
 			@createBar()
 
 		updateBarPosition: (top) ->
@@ -97,12 +102,6 @@ do ($ = jQuery, window) ->
 
 		createBar: ->
 			super
-			railInnerOHt = @$railInner.outerHeight()
-			if not @scrollSettings.barCss.height?
-				if @onescroll.$el.height() <= railInnerOHt
-					@$bar.height railInnerOHt
-				else
-					@$bar.height Math.ceil(@onescroll.$elWrapper.height() / @onescroll.$el.height() * railInnerOHt)
 			@$bar.draggable(
 				axis: "y"
 				containment: @$railInner
@@ -124,9 +123,6 @@ do ($ = jQuery, window) ->
 			super @onescroll, settings
 			@createRail()
 
-			@$rail.css "padding-left", @scrollSettings.railPadding[0]
-			@$rail.css "padding-right", @scrollSettings.railPadding[1]
-
 			@createBar()
 
 		updateBarPosition: (top, left) ->
@@ -137,8 +133,6 @@ do ($ = jQuery, window) ->
 
 		createBar: ->
 			super
-			if not @scrollSettings.barCss.width?
-				@$bar.width Math.ceil(@onescroll.$elWrapper.width() / @onescroll.$el.width() * @$railInner.outerWidth())
 			@$bar.draggable(
 				axis: "x"
 				containment: @$railInner
@@ -158,6 +152,11 @@ do ($ = jQuery, window) ->
 		constructor: (@element, options) ->
 			@scrollbars = []
 			@settings = $.extend {}, defaults, options
+			@$el = $(@element)
+			if @settings.canvasClass?
+				@$canvas = @$el.find(@settings.canvasClass)
+			else
+				@$canvas = @$el
 			@before = {}
 			@_defaults = defaults
 			@_name = pluginName
@@ -168,7 +167,7 @@ do ($ = jQuery, window) ->
 			@$el.css "position", @before.elPosition
 
 		createWrapper: ->
-			@$el = $(@element).addClass(@settings.className).wrap("<div class=\"#{@settings.wrapperClassName}\"></div>")
+			@$el.addClass(@settings.className).wrap("<div class=\"#{@settings.wrapperClassName}\"></div>")
 			@$elWrapper = @$el.parent()
 			@$elWrapper.height(@settings.height)
 			@$elWrapper.width(@settings.width)
@@ -216,9 +215,8 @@ do ($ = jQuery, window) ->
 				@$el.height "auto"
 				@$elWrapper = @$elWrapper.parent().height()
 
-
-			@mostTop = -(@$el.outerHeight() - @$elWrapper.outerHeight())
-			@mostLeft = -(@$el.outerWidth() - @$elWrapper.outerWidth())
+			@mostTop = -(@$canvas.outerHeight() - @$elWrapper.outerHeight())
+			@mostLeft = -(@$canvas.outerWidth() - @$elWrapper.outerWidth())
 
 			@createScrollbar(scrollbar) for scrollbar in @settings.scrollbars
 			window.$el = @$el
@@ -248,6 +246,8 @@ do ($ = jQuery, window) ->
 			effectiveLeft = left - dX
 			if @$el.height() <= @$elWrapper.height()
 				return ev
+			if @$el.width() <= @$elWrapper.width()
+				return ev
 			if effectiveTop >= 0
 				effectiveTop = 0
 			else if effectiveTop <= @mostTop
@@ -259,6 +259,8 @@ do ($ = jQuery, window) ->
 				effectiveLeft = 0
 			else if effectiveLeft <= @mostLeft
 				effectiveLeft = @mostLeft
+			else
+				ev.preventDefault()
 
 			@$el.css "top", effectiveTop
 			@$el.css "left", effectiveLeft
