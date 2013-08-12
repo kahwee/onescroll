@@ -40,11 +40,13 @@
         this.railClassName = this.onescroll.settings["rail" + this.scrollSettings.type + "ClassName"];
         this.barClassName = this.onescroll.settings["bar" + this.scrollSettings.type + "ClassName"];
         this.onescroll.$elWrapper.on("onescroll:scrolled", function(ev, top, left, target) {
+          var pos;
+          pos = _this.scrollSettings.type === "Vertical" ? top : left;
           if (target == null) {
-            return _this.updateBarPosition(top, left);
+            return _this.updateBarPosition(pos);
           } else {
             if (_this.barId !== target.barId) {
-              return _this.updateBarPosition(top, left);
+              return _this.updateBarPosition(pos);
             }
           }
         });
@@ -67,6 +69,15 @@
         return parseInt(this.scrollSettings.railPadding[0], 10);
       };
 
+      OnescrollGeneric.prototype.updateBarPosition = function(top) {
+        var barEdge, percentage;
+        if (top != null) {
+          percentage = top / this.onescroll["most" + this.edgesNameCap[0]] || 0;
+          barEdge = (this.$railInner.get(0)["offset" + this.lengthNameCap] - this.$bar.get(0)["offset" + this.lengthNameCap]) * percentage + parseInt(this.scrollSettings.railPadding[0], 10);
+          return this.$bar.css(this.edgesName[0], barEdge);
+        }
+      };
+
       OnescrollGeneric.prototype.refreshBarSize = function() {
         var barPropotionToRail;
         if (this.scrollSettings.barCss[this.lengthName] == null) {
@@ -86,6 +97,10 @@
         }
       };
 
+      OnescrollGeneric.prototype.getPercentage = function() {
+        return (this.getBarBoxOffset() - this.getRailBoxOffset()) / (this.$railInner.get(0)["offset" + this.lengthNameCap] - this.$bar.get(0)["offset" + this.lengthNameCap]);
+      };
+
       OnescrollGeneric.prototype.createBar = function() {
         var pos, _i, _len, _ref;
         this.$bar = $("<div class=\"" + this.barClassName + "\"></div>").uniqueId().css(this.scrollSettings.barCss);
@@ -96,7 +111,8 @@
           this._setBarBoxOffset(pos);
         }
         this.onescroll.$elWrapper.append(this.$bar);
-        return this.refreshBarSize();
+        this.refreshBarSize();
+        return this.updateBarPosition(0);
       };
 
       return OnescrollGeneric;
@@ -115,30 +131,16 @@
         this.createBar();
       }
 
-      OnescrollVertical.prototype.updateBarPosition = function(top) {
-        var barTop, percentage;
-        if (top != null) {
-          percentage = top / this.onescroll.mostTop || 0;
-          barTop = (this.$railInner.outerHeight() - this.$bar.outerHeight()) * percentage + parseInt(this.scrollSettings.railPadding[0], 10);
-          return this.$bar.css("top", barTop);
-        }
-      };
-
       OnescrollVertical.prototype.createBar = function() {
         var _this = this;
         OnescrollVertical.__super__.createBar.apply(this, arguments);
-        this.$bar.draggable({
+        return this.$bar.draggable({
           axis: "y",
           containment: this.$railInner,
           drag: function(ev) {
             return _this.onescroll.scrollTo(_this, null, $(ev.target).position().top);
           }
         });
-        return this.updateBarPosition(0);
-      };
-
-      OnescrollVertical.prototype.getPercentage = function() {
-        return (this.getBarBoxOffset() - this.getRailBoxOffset()) / (this.$railInner.outerHeight() - this.$bar.outerHeight());
       };
 
       return OnescrollVertical;
@@ -157,30 +159,16 @@
         this.createBar();
       }
 
-      OnescrollHorizontal.prototype.updateBarPosition = function(top, left) {
-        var barLeft, percentage;
-        if (left != null) {
-          percentage = left / this.onescroll.mostLeft || 0;
-          barLeft = (this.$railInner.outerWidth() - this.$bar.outerWidth()) * percentage + parseInt(this.scrollSettings.railPadding[0], 10);
-          return this.$bar.css("left", barLeft);
-        }
-      };
-
       OnescrollHorizontal.prototype.createBar = function() {
         var _this = this;
         OnescrollHorizontal.__super__.createBar.apply(this, arguments);
-        this.$bar.draggable({
+        return this.$bar.draggable({
           axis: "x",
           containment: this.$railInner,
           drag: function(ev) {
             return _this.onescroll.scrollTo(_this, $(ev.target).position().left, null);
           }
         });
-        return this.updateBarPosition(null, 0);
-      };
-
-      OnescrollHorizontal.prototype.getPercentage = function() {
-        return (this.getBarBoxOffset() - this.getRailBoxOffset()) / (this.$railInner.outerWidth() - this.$bar.outerWidth());
       };
 
       return OnescrollHorizontal;
@@ -296,14 +284,10 @@
         var effectiveLeft, effectiveTop, left, top;
         top = parseInt(this.$el.css("top"), 10) || 0;
         left = parseInt(this.$el.css("left"), 10) || 0;
+        dY = dY != null ? dY : d;
+        console.log(this.$el.height(), this.$elWrapper.height());
         effectiveTop = top + dY;
         effectiveLeft = left - dX;
-        if (this.$el.height() <= this.$elWrapper.height()) {
-          return ev;
-        }
-        if (this.$el.width() <= this.$elWrapper.width()) {
-          return ev;
-        }
         if (effectiveTop >= 0) {
           effectiveTop = 0;
         } else if (effectiveTop <= this.mostTop) {
@@ -319,7 +303,12 @@
           ev.preventDefault();
         }
         this.$el.css("top", effectiveTop);
-        this.$el.css("left", effectiveLeft);
+        if (this.$el.height() > this.$elWrapper.height()) {
+          this.$el.css("top", effectiveTop);
+        }
+        if (this.$el.width() > this.$elWrapper.width()) {
+          this.$el.css("left", effectiveLeft);
+        }
         this.$elWrapper.trigger("onescroll:scrolled", [effectiveTop, effectiveLeft]);
         return ev;
       };

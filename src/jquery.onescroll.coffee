@@ -37,11 +37,12 @@ do ($ = jQuery, window) ->
 			@railClassName = @onescroll.settings["rail#{@scrollSettings.type}ClassName"]
 			@barClassName = @onescroll.settings["bar#{@scrollSettings.type}ClassName"]
 			@onescroll.$elWrapper.on "onescroll:scrolled", (ev, top, left, target) =>
+				pos = if @scrollSettings.type is "Vertical" then top else left
 				if not target?
-					@updateBarPosition(top, left)
+					@updateBarPosition(pos)
 				else
 					if @barId isnt target.barId
-						@updateBarPosition(top, left)
+						@updateBarPosition(pos)
 
 		createRail: ->
 			@$rail = $("<div class=\"#{@railClassName}\"></div>")
@@ -62,6 +63,12 @@ do ($ = jQuery, window) ->
 		getRailBoxOffset: ->
 			parseInt(@scrollSettings.railPadding[0], 10)
 
+		updateBarPosition: (top) ->
+			if top?
+				percentage =  top / @onescroll["most#{@edgesNameCap[0]}"] || 0
+				barEdge = (@$railInner.get(0)["offset#{@lengthNameCap}"] - @$bar.get(0)["offset#{@lengthNameCap}"]) * percentage + parseInt(@scrollSettings.railPadding[0], 10)
+				@$bar.css @edgesName[0], barEdge
+
 		refreshBarSize: ->
 			if not @scrollSettings.barCss[@lengthName]?
 				barPropotionToRail = parseInt(@onescroll.$elWrapper.css(@lengthName), 10) / parseInt(@onescroll.$canvas.css(@lengthName), 10)
@@ -75,6 +82,9 @@ do ($ = jQuery, window) ->
 			if @scrollSettings.railCss[position]?
 				@$bar.css position, @scrollSettings.railCss[position]
 
+		getPercentage: ->
+			(@getBarBoxOffset() - @getRailBoxOffset()) / (@$railInner.get(0)["offset#{@lengthNameCap}"] - @$bar.get(0)["offset#{@lengthNameCap}"])
+
 		createBar: ->
 			@$bar = $("<div class=\"#{@barClassName}\"></div>")
 				.uniqueId()
@@ -84,6 +94,9 @@ do ($ = jQuery, window) ->
 			@_setBarBoxOffset pos for pos in ["right", "top", "left", "bottom"]
 			@onescroll.$elWrapper.append(@$bar)
 			@refreshBarSize()
+			# Needed to update just in case, rail has padding of more than 0.
+			# Not doing this will result in bar to appear before the rail begins.
+			@updateBarPosition(0)
 
 	# Vertical scrollbar
 	class OnescrollVertical extends OnescrollGeneric
@@ -94,12 +107,6 @@ do ($ = jQuery, window) ->
 			@createRail()
 			@createBar()
 
-		updateBarPosition: (top) ->
-			if top?
-				percentage =  top / @onescroll.mostTop || 0
-				barTop = (@$railInner.outerHeight() - @$bar.outerHeight()) * percentage + parseInt(@scrollSettings.railPadding[0], 10)
-				@$bar.css "top", barTop
-
 		createBar: ->
 			super
 			@$bar.draggable(
@@ -108,12 +115,6 @@ do ($ = jQuery, window) ->
 				drag: (ev) =>
 					@onescroll.scrollTo(@, null, $(ev.target).position().top)
 			)
-			# Needed to update just in case, rail has padding of more than 0.
-			# Not doing this will result in bar to appear before the rail begins.
-			@updateBarPosition(0)
-
-		getPercentage: ->
-			(@getBarBoxOffset() - @getRailBoxOffset()) / (@$railInner.outerHeight() - @$bar.outerHeight())
 
 	# Horizontal scrollbar
 	class OnescrollHorizontal extends OnescrollGeneric
@@ -122,14 +123,7 @@ do ($ = jQuery, window) ->
 			settings.type = "Horizontal"
 			super @onescroll, settings
 			@createRail()
-
 			@createBar()
-
-		updateBarPosition: (top, left) ->
-			if left?
-				percentage =  left / @onescroll.mostLeft || 0
-				barLeft = (@$railInner.outerWidth() - @$bar.outerWidth()) * percentage + parseInt(@scrollSettings.railPadding[0], 10)
-				@$bar.css "left", barLeft
 
 		createBar: ->
 			super
@@ -139,13 +133,6 @@ do ($ = jQuery, window) ->
 				drag: (ev) =>
 					@onescroll.scrollTo(@, $(ev.target).position().left, null)
 			)
-			# Needed to update just in case, rail has padding of more than 0.
-			# Not doing this will result in bar to appear before the rail begins.
-			@updateBarPosition(null, 0)
-
-		getPercentage: ->
-			(@getBarBoxOffset() - @getRailBoxOffset()) / (@$railInner.outerWidth() - @$bar.outerWidth())
-
 
 	# Onescroll constructor
 	class Onescroll
@@ -242,12 +229,12 @@ do ($ = jQuery, window) ->
 		scrollWheel: (ev, d, dX, dY) ->
 			top = parseInt(@$el.css("top"), 10) || 0
 			left = parseInt(@$el.css("left"), 10) || 0
+			# More for internet explorer 8.0 support
+			dY = if dY? then dY else d
+			console.log @$el.height(), @$elWrapper.height()
 			effectiveTop = top + dY
 			effectiveLeft = left - dX
-			if @$el.height() <= @$elWrapper.height()
-				return ev
-			if @$el.width() <= @$elWrapper.width()
-				return ev
+
 			if effectiveTop >= 0
 				effectiveTop = 0
 			else if effectiveTop <= @mostTop
@@ -263,7 +250,10 @@ do ($ = jQuery, window) ->
 				ev.preventDefault()
 
 			@$el.css "top", effectiveTop
-			@$el.css "left", effectiveLeft
+			if @$el.height() > @$elWrapper.height()
+				@$el.css "top", effectiveTop
+			if @$el.width() > @$elWrapper.width()
+				@$el.css "left", effectiveLeft
 
 			@$elWrapper.trigger "onescroll:scrolled", [effectiveTop, effectiveLeft]
 			ev
