@@ -69,11 +69,15 @@
         return parseInt(this.scrollSettings.railPadding[0], 10);
       };
 
-      OnescrollGeneric.prototype.updateBarPosition = function(top) {
+      OnescrollGeneric.prototype.updateBarPosition = function(edge) {
         var barEdge, percentage;
-        if (top != null) {
-          percentage = top / this.onescroll["most" + this.edgesNameCap[0]] || 0;
+        if (edge != null) {
+          percentage = edge / this.onescroll["most" + this.edgesNameCap[0]] || 0;
           barEdge = (this.$railInner.get(0)["offset" + this.lengthNameCap] - this.$bar.get(0)["offset" + this.lengthNameCap]) * percentage + parseInt(this.scrollSettings.railPadding[0], 10);
+          if ((this.previousPercentage != null) && this.previousPercentage !== percentage) {
+            this.onescroll.$elWrapper.trigger("onescroll:barPositionChanged", [this.scrollSettings.type, percentage, edge, barEdge]);
+          }
+          this.previousPercentage = percentage;
           return this.$bar.css(this.edgesName[0], barEdge);
         }
       };
@@ -285,7 +289,6 @@
         top = parseInt(this.$el.css("top"), 10) || 0;
         left = parseInt(this.$el.css("left"), 10) || 0;
         dY = dY != null ? dY : d;
-        console.log(this.$el.height(), this.$elWrapper.height());
         effectiveTop = top + dY;
         effectiveLeft = left - dX;
         if (effectiveTop >= 0) {

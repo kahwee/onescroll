@@ -63,10 +63,13 @@ do ($ = jQuery, window) ->
 		getRailBoxOffset: ->
 			parseInt(@scrollSettings.railPadding[0], 10)
 
-		updateBarPosition: (top) ->
-			if top?
-				percentage =  top / @onescroll["most#{@edgesNameCap[0]}"] || 0
+		updateBarPosition: (edge) ->
+			if edge?
+				percentage =  edge / @onescroll["most#{@edgesNameCap[0]}"] || 0
 				barEdge = (@$railInner.get(0)["offset#{@lengthNameCap}"] - @$bar.get(0)["offset#{@lengthNameCap}"]) * percentage + parseInt(@scrollSettings.railPadding[0], 10)
+				if @previousPercentage? and @previousPercentage isnt percentage
+					@onescroll.$elWrapper.trigger "onescroll:barPositionChanged", [@scrollSettings.type, percentage, edge, barEdge]
+				@previousPercentage = percentage
 				@$bar.css @edgesName[0], barEdge
 
 		refreshBarSize: ->
@@ -231,7 +234,6 @@ do ($ = jQuery, window) ->
 			left = parseInt(@$el.css("left"), 10) || 0
 			# More for internet explorer 8.0 support
 			dY = if dY? then dY else d
-			console.log @$el.height(), @$elWrapper.height()
 			effectiveTop = top + dY
 			effectiveLeft = left - dX
 

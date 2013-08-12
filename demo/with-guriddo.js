@@ -164,7 +164,9 @@ dataView.onRowsChanged.subscribe(function(e, args) {
 
 window.grid = grid;
 
-$('.guriddo-main .slick-viewport').onescroll({
+var objectToApplyOneScroll = grid.elMain.find('.slick-viewport');
+
+objectToApplyOneScroll.onescroll({
 	height: "424px",
 	canvasClass: '.grid-canvas',
 	scrollbars: [{
@@ -176,3 +178,14 @@ $('.guriddo-main .slick-viewport').onescroll({
 		type: "HorizontalTop"
 	}]
 });
+var onescroll = $('.guriddo-main .slick-viewport').data('plugin_onescroll');
+onescroll.$elWrapper.on("onescroll:barPositionChanged", _.debounce(function(ev, type, percentage) {
+	if (type === "Vertical") {
+		grid.gridMain.scrollCellIntoView(percentage * data.length);
+		grid.elFrozen.css('top', objectToApplyOneScroll.css('top'));
+		grid.gridFrozen.scrollCellIntoView(percentage * data.length);
+	}
+
+}, 15));
+
+window.onescroll = onescroll;
