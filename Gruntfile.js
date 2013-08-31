@@ -17,6 +17,9 @@ module.exports = function(grunt) {
 					src: bowerPath + "/jquery-ui/ui/jquery-ui.js",
 					dest: distPath + "/jquery-ui.js"
 				}, {
+					src: bowerPath + "/lodash/dist/lodash.js",
+					dest: distPath + "/lodash.js"
+				}, {
 					src: bowerPath + "/jquery-mousewheel/jquery.mousewheel.js",
 					dest: distPath + "/jquery.mousewheel.js"
 				}]

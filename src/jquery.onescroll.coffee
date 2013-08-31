@@ -18,6 +18,10 @@ do ($ = jQuery, window) ->
 		barVerticalClassName: "#{pluginName}-bar-v"
 		height: "auto"
 		width: "auto"
+		showScrollbarsEvent: "mousewheel"
+		hideScrollbarsEvent: "idle"
+		# This hides the scrollbar in the given millisecs after the showScrollbarsEvent
+		hideScrollbarsWhenIdle: 10000
 		scrollbars: [{
 			type: "VerticalRight"
 		}, {
@@ -28,6 +32,7 @@ do ($ = jQuery, window) ->
 	class OnescrollGeneric
 
 		constructor: (@onescroll, options) ->
+			# This cannot be Defaults as coffeescript assumes it will be the top scope.
 			scrollDefaults =
 				type: "Vertical" # Vertical must be in caps due to camelCase later
 				railPadding: ["0px", "8px"]
@@ -36,6 +41,15 @@ do ($ = jQuery, window) ->
 			[@lengthName, @lengthNameCap] = if @scrollSettings.type is "Vertical" then ["height", "Height"] else ["width", "Width"]
 			@railClassName = @onescroll.settings["rail#{@scrollSettings.type}ClassName"]
 			@barClassName = @onescroll.settings["bar#{@scrollSettings.type}ClassName"]
+
+			@onescroll.$elWrapper.on "onescroll:showScrollbars", (ev) =>
+				@$bar.fadeIn()
+				@$rail.fadeIn()
+				@$railInner.fadeIn()
+			@onescroll.$elWrapper.on "onescroll:hideScrollbars", (ev) =>
+				@$bar.fadeOut()
+				@$rail.fadeOut()
+				@$railInner.fadeOut()
 			@onescroll.$elWrapper.on "onescroll:scrolled", (ev, top, left, target) =>
 				pos = if @scrollSettings.type is "Vertical" then top else left
 				if not target?
@@ -77,9 +91,6 @@ do ($ = jQuery, window) ->
 				barPropotionToRail = parseInt(@onescroll.$elWrapper.css(@lengthName), 10) / parseInt(@onescroll.$canvas.css(@lengthName), 10)
 				barPropotionToRail = if barPropotionToRail > 1 then 1 else barPropotionToRail
 				@$bar.css @lengthName, Math.ceil(barPropotionToRail * @$railInner.get(0)["offset#{@lengthNameCap}"])
-
-		getCurrentBarBoxOffsetWithoutRailPadding: ->
-			@getBarBoxOffset() - @getRailBoxOffset()
 
 		_setBarBoxOffset: (position) ->
 			if @scrollSettings.railCss[position]?
@@ -192,7 +203,7 @@ do ($ = jQuery, window) ->
 
 
 		init: ->
-			@createWrapper();
+			@createWrapper()
 
 			# Setting up
 			@before.elPosition = @$el.css "position"
@@ -215,7 +226,19 @@ do ($ = jQuery, window) ->
 			@addEventListeners()
 
 		addEventListeners: ->
-			@$elWrapper.on("mousewheel", @_onWheel)
+			@hideScrollbarsEvent = "mouseout"
+			@$elWrapper.on @settings.showScrollbarsEvent, (ev) =>
+				@$elWrapper.trigger "onescroll:showScrollbars"
+				if @settings.hideScrollbarsWhenIdle
+					_.delay () ->
+						@$elWrapper.trigger "onescroll:hideScrollbars"
+					, @settings.hideScrollbarsWhenIdle
+
+			@$elWrapper.on "mouseout", (ev) =>
+				@$elWrapper.trigger "onescroll:hideScrollbars"
+
+			if @mostTop < 0
+				@$elWrapper.on "mousewheel", @_onWheel
 
 		_onWheel: (ev, d, dX, dY) =>
 			@scrollWheel(ev, d, dX, dY)

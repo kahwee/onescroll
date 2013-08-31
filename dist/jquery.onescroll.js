@@ -17,6 +17,9 @@
       barVerticalClassName: "" + pluginName + "-bar-v",
       height: "auto",
       width: "auto",
+      showScrollbarsEvent: "mousewheel",
+      hideScrollbarsEvent: "idle",
+      hideScrollbarsWhenIdle: 10000,
       scrollbars: [
         {
           type: "VerticalRight"
@@ -39,6 +42,16 @@
         _ref1 = this.scrollSettings.type === "Vertical" ? ["height", "Height"] : ["width", "Width"], this.lengthName = _ref1[0], this.lengthNameCap = _ref1[1];
         this.railClassName = this.onescroll.settings["rail" + this.scrollSettings.type + "ClassName"];
         this.barClassName = this.onescroll.settings["bar" + this.scrollSettings.type + "ClassName"];
+        this.onescroll.$elWrapper.on("onescroll:showScrollbars", function(ev) {
+          _this.$bar.fadeIn();
+          _this.$rail.fadeIn();
+          return _this.$railInner.fadeIn();
+        });
+        this.onescroll.$elWrapper.on("onescroll:hideScrollbars", function(ev) {
+          _this.$bar.fadeOut();
+          _this.$rail.fadeOut();
+          return _this.$railInner.fadeOut();
+        });
         this.onescroll.$elWrapper.on("onescroll:scrolled", function(ev, top, left, target) {
           var pos;
           pos = _this.scrollSettings.type === "Vertical" ? top : left;
@@ -89,10 +102,6 @@
           barPropotionToRail = barPropotionToRail > 1 ? 1 : barPropotionToRail;
           return this.$bar.css(this.lengthName, Math.ceil(barPropotionToRail * this.$railInner.get(0)["offset" + this.lengthNameCap]));
         }
-      };
-
-      OnescrollGeneric.prototype.getCurrentBarBoxOffsetWithoutRailPadding = function() {
-        return this.getBarBoxOffset() - this.getRailBoxOffset();
       };
 
       OnescrollGeneric.prototype._setBarBoxOffset = function(position) {
@@ -267,7 +276,22 @@
       };
 
       Onescroll.prototype.addEventListeners = function() {
-        return this.$elWrapper.on("mousewheel", this._onWheel);
+        var _this = this;
+        this.hideScrollbarsEvent = "mouseout";
+        this.$elWrapper.on(this.settings.showScrollbarsEvent, function(ev) {
+          _this.$elWrapper.trigger("onescroll:showScrollbars");
+          if (_this.settings.hideScrollbarsWhenIdle) {
+            return x_.delay(function() {
+              return this.$elWrapper.trigger("onescroll:hideScrollbars");
+            }, _this.settings.hideScrollbarsWhenIdle);
+          }
+        });
+        this.$elWrapper.on("mouseout", function(ev) {
+          return _this.$elWrapper.trigger("onescroll:hideScrollbars");
+        });
+        if (this.mostTop < 0) {
+          return this.$elWrapper.on("mousewheel", this._onWheel);
+        }
       };
 
       Onescroll.prototype._onWheel = function(ev, d, dX, dY) {
