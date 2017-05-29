@@ -1,5 +1,7 @@
 ## Onescroll
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/kahwee/onescroll.svg)](https://greenkeeper.io/)
+
 A customizable scrollbar solution for jQuery.
 
 ## Dependencies
