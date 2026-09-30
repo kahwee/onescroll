@@ -5,7 +5,7 @@ A customizable scrollbar solution for jQuery.
 ## Dependencies
 
 * [jQuery](http://jquery.com/)
-* [jQuery UI](jqueryui.com) (Core, Widget, Mouse and Draggable)
+* [jQuery UI](https://jqueryui.com) (Core, Widget, Mouse and Draggable)
 * [jQuery Mousewheel](https://github.com/brandonaaron/jquery-mousewheel)
 
 ## Install via Bower
@@ -81,7 +81,8 @@ yourJQueryElement.data('plugin_onescroll')
 ```
 ## Browser support
 
-I have only tested this in the latest browsers.
+The original tests covered the browsers below, including IE10. This is
+historical testing evidence, not a current browser support matrix.
 
 * Chrome
 * Firefox
