@@ -96,3 +96,7 @@ Check [CONTRIBUTING.md](https://github.com/kahwee/onescroll/blob/master/CONTRIBU
 ## License
 
 MIT License
+
+## Maintenance status
+
+This project is no longer actively maintained and is archived for historical reference.
